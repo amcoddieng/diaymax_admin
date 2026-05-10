@@ -26,8 +26,16 @@ import {
   ExclamationTriangleIcon,
   BuildingStorefrontIcon,
   PhoneIcon,
-  EnvelopeIcon
+  EnvelopeIcon,
+  XMarkIcon,
+  CheckIcon,
+  ClockIcon,
+  FireIcon,
+  SparklesIcon,
+  TruckIcon,
+  ShieldCheckIcon
 } from '@heroicons/react/24/outline'
+import { StarIcon as StarIconSolid } from '@heroicons/react/24/solid'
 
 interface Boutique {
   id: number
@@ -194,7 +202,6 @@ export default function BoutiqueDetailPage({ params }: { params: Promise<{ bouti
       
       const allArticles: Article[] = []
       
-      // Fetch articles for each product of this boutique
       for (const product of products) {
         try {
           console.log(`🔍 Fetching articles for product ${product.id} (${product.nom})...`)
@@ -283,6 +290,13 @@ export default function BoutiqueDetailPage({ params }: { params: Promise<{ bouti
     }
   }
 
+  const getStockStatus = (stock: number) => {
+    if (stock === 0) return { label: 'Rupture', color: 'text-red-600', bg: 'bg-red-50' }
+    if (stock < 10) return { label: 'Stock faible', color: 'text-orange-600', bg: 'bg-orange-50' }
+    if (stock < 50) return { label: 'Stock moyen', color: 'text-blue-600', bg: 'bg-blue-50' }
+    return { label: 'Stock élevé', color: 'text-emerald-600', bg: 'bg-emerald-50' }
+  }
+
   const filteredProducts = products.filter(product =>
     product.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.description.toLowerCase().includes(searchTerm.toLowerCase())
@@ -297,7 +311,12 @@ export default function BoutiqueDetailPage({ params }: { params: Promise<{ bouti
     return (
       <AdminLayout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+          <div className="relative">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4" style={{ borderColor: '#0f7b6c' }}></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="h-8 w-8 rounded-full bg-gradient-to-r from-[#0f7b6c] to-[#ffc300] animate-pulse"></div>
+            </div>
+          </div>
         </div>
       </AdminLayout>
     )
@@ -305,82 +324,94 @@ export default function BoutiqueDetailPage({ params }: { params: Promise<{ bouti
 
   return (
     <AdminLayout>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={() => router.back()}
-              className="flex items-center text-gray-600 hover:text-gray-900"
-            >
-              <ArrowLeftIcon className="h-5 w-5 mr-2" />
-              Retour
-            </button>
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                {boutique?.nom || 'Boutique'}
-              </h1>
-              <p className="text-gray-600">
-                Gestion complète de la boutique
-              </p>
+      <div className="space-y-3">
+        {/* Header with Gradient */}
+        <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-[#0f7b6c] to-[#0a5c50] p-4 text-white">
+          <div className="relative z-10">
+            <div className="flex justify-between items-start">
+              <div className="flex items-center space-x-2">
+                <button
+                  onClick={() => router.back()}
+                  className="flex items-center px-2 py-1.5 bg-white/10 rounded-lg hover:bg-white/20 transition-all backdrop-blur-sm"
+                >
+                  <ArrowLeftIcon className="h-3 w-3 mr-1" />
+                  Retour
+                </button>
+                <div>
+                  <h1 className="text-lg font-bold mb-1">
+                    {boutique?.nom || 'Boutique'}
+                  </h1>
+                  <p className="text-emerald-100 text-xs">
+                    Gestion complète de la boutique
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowEditModal(true)}
+                className="flex items-center px-3 py-1.5 bg-[#ffc300] text-gray-900 rounded-lg font-semibold hover:bg-[#e5b000] transition-all transform hover:scale-105 shadow-lg text-sm"
+              >
+                <PencilIcon className="h-3 w-3 mr-1" />
+                Modifier
+              </button>
             </div>
           </div>
-          <div className="flex space-x-3">
-            <button
-              onClick={() => setShowEditModal(true)}
-              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-            >
-              <PencilIcon className="h-5 w-5 mr-2" />
-              Modifier
-            </button>
-          </div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-16 -mt-16"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-[#ffc300] opacity-10 rounded-full -ml-12 -mb-12"></div>
         </div>
 
-        {/* Boutique Info Card */}
+        {/* Boutique Info Card Premium */}
         {boutique && (
-          <div className="bg-white rounded-lg shadow-lg p-6">
-            <div className="flex items-start space-x-6">
+          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 hover:shadow-md transition-shadow">
+            <div className="flex flex-col md:flex-row gap-3">
               <div className="flex-shrink-0">
                 {boutique.logo ? (
                   <img
-                    src={boutique.logo}
+                    src={`http://10.153.54.247:8080${boutique.logo}`}
                     alt={boutique.nom}
-                    className="h-24 w-24 object-cover rounded-lg"
+                    className="h-20 w-20 object-cover rounded-lg shadow-md"
                   />
                 ) : (
-                  <div className="h-24 w-24 bg-gray-200 rounded-lg flex items-center justify-center">
-                    <BuildingStorefrontIcon className="h-12 w-12 text-gray-400" />
+                  <div className="h-20 w-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
+                    <BuildingStorefrontIcon className="h-8 w-8 text-gray-400" />
                   </div>
                 )}
               </div>
               <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-900">{boutique.nom}</h2>
-                    <p className="text-gray-600 mt-1">{boutique.description}</p>
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <div className="flex-1">
+                    <h2 className="text-lg font-bold text-gray-900 mb-1">{boutique.nom}</h2>
+                    <p className="text-sm text-gray-600">{boutique.description}</p>
                   </div>
-                  <div className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(boutique.statut)}`}>
+                  <div className={`inline-flex items-center px-2 py-1 rounded-lg text-xs font-semibold ${
+                    boutique.statut === 'VALIDE' ? 'bg-emerald-50 text-emerald-700' :
+                    boutique.statut === 'EN_ATTENTE' ? 'bg-amber-50 text-amber-700' :
+                    boutique.statut === 'SUSPENDU' ? 'bg-orange-50 text-orange-700' :
+                    'bg-red-50 text-red-700'
+                  }`}>
+                    {boutique.statut === 'VALIDE' && <CheckIcon className="h-3 w-3 mr-1" />}
+                    {boutique.statut === 'EN_ATTENTE' && <ClockIcon className="h-3 w-3 mr-1" />}
                     {boutique.statut}
                   </div>
                 </div>
                 
-                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
                   <div className="flex items-center text-gray-600">
-                    <MapPinIcon className="h-5 w-5 mr-2" />
-                    {boutique.addresse}
+                    <MapPinIcon className="h-3 w-3 mr-1 text-[#0f7b6c]" />
+                    <span className="text-sm">{boutique.addresse}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <StarIconSolid className="h-3 w-3 mr-1 text-[#ffc300]" />
+                    <span className="font-semibold text-gray-900 text-sm">{boutique.note.toFixed(1)}</span>
+                    <span className="text-gray-500 ml-1 text-xs">/ 5.0</span>
                   </div>
                   <div className="flex items-center text-gray-600">
-                    <StarIcon className="h-5 w-5 mr-2 text-yellow-400" />
-                    {boutique.note.toFixed(1)} / 5.0
-                  </div>
-                  <div className="flex items-center text-gray-600">
-                    <CalendarIcon className="h-5 w-5 mr-2" />
-                    Créée le {formatDate(boutique.createdAt)}
+                    <CalendarIcon className="h-3 w-3 mr-1 text-[#0f7b6c]" />
+                    <span className="text-sm">Créée le {formatDate(boutique.createdAt)}</span>
                   </div>
                   {boutique.vendeur && (
                     <div className="flex items-center text-gray-600">
-                      <UserIcon className="h-5 w-5 mr-2" />
-                      {boutique.vendeur.prenom} {boutique.vendeur.nom}
+                      <UserIcon className="h-3 w-3 mr-1 text-[#0f7b6c]" />
+                      <span className="text-sm">{boutique.vendeur.prenom} {boutique.vendeur.nom}</span>
                     </div>
                   )}
                 </div>
@@ -389,143 +420,169 @@ export default function BoutiqueDetailPage({ params }: { params: Promise<{ bouti
           </div>
         )}
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-          <div className="bg-white p-4 rounded-lg shadow">
-            <div className="flex items-center">
-              <ShoppingBagIcon className="h-8 w-8 text-emerald-600" />
-              <div className="ml-3">
-                <p className="text-sm text-gray-500">Produits</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalProducts}</p>
+        {/* Stats Cards Modern */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+          <div className="group bg-white rounded-lg shadow-sm border border-gray-100 p-3 hover:shadow-md transition-all hover:-translate-y-0.5">
+            <div className="flex flex-col items-center text-center">
+              <div className="p-2 bg-emerald-50 rounded-lg group-hover:bg-emerald-100 transition-colors mb-2">
+                <ShoppingBagIcon className="h-5 w-5 text-[#0f7b6c]" />
               </div>
+              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Produits</p>
+              <p className="text-xl font-bold text-gray-900">{stats.totalProducts}</p>
+              <div className="mt-1 text-xs text-emerald-600 font-medium">+12%</div>
             </div>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <div className="flex items-center">
-              <CubeIcon className="h-8 w-8 text-blue-600" />
-              <div className="ml-3">
-                <p className="text-sm text-gray-500">Articles</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalArticles}</p>
+          <div className="group bg-white rounded-lg shadow-sm border border-gray-100 p-3 hover:shadow-md transition-all hover:-translate-y-0.5">
+            <div className="flex flex-col items-center text-center">
+              <div className="p-2 bg-blue-50 rounded-lg group-hover:bg-blue-100 transition-colors mb-2">
+                <CubeIcon className="h-5 w-5 text-blue-600" />
               </div>
+              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Articles</p>
+              <p className="text-xl font-bold text-gray-900">{stats.totalArticles}</p>
+              <div className="mt-1 text-xs text-blue-600 font-medium">+8%</div>
             </div>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <div className="flex items-center">
-              <ChartBarIcon className="h-8 w-8 text-purple-600" />
-              <div className="ml-3">
-                <p className="text-sm text-gray-500">Stock Total</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.totalStock}</p>
+          <div className="group bg-white rounded-lg shadow-sm border border-gray-100 p-3 hover:shadow-md transition-all hover:-translate-y-0.5">
+            <div className="flex flex-col items-center text-center">
+              <div className="p-2 bg-purple-50 rounded-lg group-hover:bg-purple-100 transition-colors mb-2">
+                <ChartBarIcon className="h-5 w-5 text-purple-600" />
               </div>
+              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Stock Total</p>
+              <p className="text-xl font-bold text-gray-900">{stats.totalStock}</p>
+              <div className="mt-1 text-xs text-purple-600 font-medium">+5%</div>
             </div>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <div className="flex items-center">
-              <CurrencyDollarIcon className="h-8 w-8 text-green-600" />
-              <div className="ml-3">
-                <p className="text-sm text-gray-500">Prix Moyen</p>
-                <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.averagePrice)}</p>
+          <div className="group bg-white rounded-lg shadow-sm border border-gray-100 p-3 hover:shadow-md transition-all hover:-translate-y-0.5">
+            <div className="flex flex-col items-center text-center">
+              <div className="p-2 bg-emerald-50 rounded-lg group-hover:bg-emerald-100 transition-colors mb-2">
+                <CurrencyDollarIcon className="h-5 w-5 text-[#0f7b6c]" />
               </div>
+              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Prix Moyen</p>
+              <p className="text-xl font-bold text-gray-900">{formatCurrency(stats.averagePrice)}</p>
+              <div className="mt-1 text-xs text-emerald-600 font-medium">+3%</div>
             </div>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <div className="flex items-center">
-              <ExclamationTriangleIcon className="h-8 w-8 text-red-600" />
-              <div className="ml-3">
-                <p className="text-sm text-gray-500">Rupture Stock</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.outOfStockCount}</p>
+          <div className="group bg-white rounded-lg shadow-sm border border-gray-100 p-3 hover:shadow-md transition-all hover:-translate-y-0.5">
+            <div className="flex flex-col items-center text-center">
+              <div className="p-2 bg-red-50 rounded-lg group-hover:bg-red-100 transition-colors mb-2">
+                <ExclamationTriangleIcon className="h-5 w-5 text-red-600" />
               </div>
+              <p className="text-xs text-gray-500 uppercase tracking-wide mb-1">Rupture Stock</p>
+              <p className="text-xl font-bold text-gray-900">{stats.outOfStockCount}</p>
+              <div className="mt-1 text-xs text-red-600 font-medium">-2%</div>
             </div>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow">
-            <div className="flex items-center">
-              <CurrencyDollarIcon className="h-8 w-8 text-emerald-600" />
-              <div className="ml-3">
-                <p className="text-sm text-gray-500">Valeur Stock</p>
-                <p className="text-2xl font-bold text-gray-900">{formatCurrency(stats.totalValue)}</p>
+          <div className="group bg-gradient-to-r from-[#ffc300]/10 to-[#ffc300]/5 rounded-lg border border-[#ffc300]/20 p-3 hover:shadow-md transition-all hover:-translate-y-0.5">
+            <div className="flex flex-col items-center text-center">
+              <div className="p-2 bg-[#ffc300]/20 rounded-lg mb-2">
+                <FireIcon className="h-5 w-5 text-[#d4a000]" />
               </div>
+              <p className="text-xs text-gray-600 uppercase tracking-wide mb-1">Valeur Stock</p>
+              <p className="text-xl font-bold text-gray-900">{formatCurrency(stats.totalValue)}</p>
+              <div className="mt-1 text-xs text-[#d4a000] font-medium">+15%</div>
             </div>
           </div>
         </div>
 
-        {/* Tabs */}
-        <div className="bg-white shadow rounded-lg">
-          <div className="border-b border-gray-200">
-            <nav className="flex -mb-px">
+        {/* Tabs Modern */}
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100">
+          <div className="border-b border-gray-100">
+            <nav className="flex px-3 gap-3">
               <button
                 onClick={() => setActiveTab('overview')}
-                className={`py-2 px-6 border-b-2 font-medium text-sm ${
+                className={`py-2 text-xs font-medium transition-colors relative ${
                   activeTab === 'overview'
-                    ? 'border-emerald-500 text-emerald-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                    ? 'text-[#0f7b6c]'
+                    : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
                 Vue d'ensemble
+                {activeTab === 'overview' && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0f7b6c] rounded-full"></div>
+                )}
               </button>
               <button
                 onClick={() => setActiveTab('products')}
-                className={`py-2 px-6 border-b-2 font-medium text-sm ${
+                className={`py-2 text-xs font-medium transition-colors relative ${
                   activeTab === 'products'
-                    ? 'border-emerald-500 text-emerald-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                    ? 'text-[#0f7b6c]'
+                    : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
                 Produits ({stats.totalProducts})
+                {activeTab === 'products' && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0f7b6c] rounded-full"></div>
+                )}
               </button>
               <button
                 onClick={() => setActiveTab('articles')}
-                className={`py-2 px-6 border-b-2 font-medium text-sm ${
+                className={`py-2 text-xs font-medium transition-colors relative ${
                   activeTab === 'articles'
-                    ? 'border-emerald-500 text-emerald-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                    ? 'text-[#0f7b6c]'
+                    : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
                 Articles ({stats.totalArticles})
+                {activeTab === 'articles' && (
+                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0f7b6c] rounded-full"></div>
+                )}
               </button>
             </nav>
           </div>
 
-          {/* Tab Content */}
-          <div className="p-6">
+          <div className="p-3">
             {/* Overview Tab */}
             {activeTab === 'overview' && (
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                   {/* Recent Products */}
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Produits récents</h3>
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-sm font-semibold text-gray-900">Produits récents</h3>
+                      <SparklesIcon className="h-3 w-3 text-[#ffc300]" />
+                    </div>
                     <div className="space-y-3">
                       {products.length > 0 ? (
-                        products.slice(0, 5).map((product) => (
-                          <div key={product.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        products.slice(0, 5).map((product, index) => (
+                          <div key={product.id} className="group flex items-center justify-between p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                             <div className="flex items-center">
-                              {product.image ? (
-                                <img src={product.image} alt={product.nom} className="h-10 w-10 object-cover rounded mr-3" />
-                              ) : (
-                                <div className="h-10 w-10 bg-gray-200 rounded mr-3 flex items-center justify-center">
-                                  <PhotoIcon className="h-6 w-6 text-gray-400" />
+                              <div className="relative">
+                                {product.image ? (
+                                  <img src={`http://10.153.54.247:8080${product.image}`} alt={product.nom} className="h-8 w-8 object-cover rounded-md" />
+                                ) : (
+                                  <div className="h-8 w-8 bg-gray-200 rounded-md flex items-center justify-center">
+                                    <PhotoIcon className="h-4 w-4 text-gray-400" />
+                                  </div>
+                                )}
+                                <div className="absolute -top-1 -left-1 w-4 h-4 bg-[#0f7b6c] text-white text-xs rounded-full flex items-center justify-center font-bold">
+                                  {index + 1}
                                 </div>
-                              )}
-                              <div>
-                                <p className="font-medium text-gray-900">{product.nom}</p>
-                                <p className="text-sm text-gray-500">{product.sousCategorie?.categorie?.nom}</p>
+                              </div>
+                              <div className="ml-2">
+                                <p className="text-xs font-medium text-gray-900 truncate max-w-32">{product.nom}</p>
+                                <p className="text-xs text-gray-500">{product.sousCategorie?.categorie?.nom}</p>
                               </div>
                             </div>
-                            <button
-                              onClick={() => {
-                                setSelectedProduct(product)
-                                setShowDetails(true)
-                              }}
-                              className="text-emerald-600 hover:text-emerald-900"
-                            >
-                              <EyeIcon className="h-5 w-5" />
-                            </button>
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={() => router.push(`/products/${product.id}/articles`)}
+                                className="p-1 text-[#0f7b6c] hover:bg-[#0f7b6c]/10 rounded-md transition-colors"
+                              >
+                                <EyeIcon className="h-3 w-3" />
+                              </button>
+                              <button
+                                onClick={() => setSelectedProduct(product)}
+                                className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+                              >
+                                <PencilIcon className="h-3 w-3" />
+                              </button>
+                            </div>
                           </div>
                         ))
                       ) : (
-                        <div className="text-center py-8 text-gray-500">
-                          <ShoppingBagIcon className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                          <p>Aucun produit trouvé pour cette boutique</p>
-                          <p className="text-sm mt-1">Les produits apparaîtront ici une fois créés</p>
+                        <div className="text-center py-6 text-gray-500">
+                          <ShoppingBagIcon className="h-12 w-12 mx-auto mb-2 text-gray-300" />
+                          <p className="text-sm">Aucun produit trouvé</p>
                         </div>
                       )}
                     </div>
@@ -533,35 +590,41 @@ export default function BoutiqueDetailPage({ params }: { params: Promise<{ bouti
 
                   {/* Low Stock Articles */}
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-4">Articles en stock faible</h3>
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-sm font-semibold text-gray-900">Alertes stock</h3>
+                      <TruckIcon className="h-3 w-3 text-[#0f7b6c]" />
+                    </div>
                     <div className="space-y-3">
-                      {articles.length > 0 ? (
+                      {articles.filter(a => a.stockActuel < 10).length > 0 ? (
                         articles
-                          .filter(article => article.stockActuel < 10 && article.stockActuel > 0)
+                          .filter(article => article.stockActuel < 10)
                           .slice(0, 5)
                           .map((article) => {
                             const attributes = parseAttributes(article.attributs)
+                            const stockStatus = getStockStatus(article.stockActuel)
                             return (
-                              <div key={article.id} className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+                              <div key={article.id} className={`flex items-center justify-between p-3 ${stockStatus.bg} rounded-xl`}>
                                 <div>
                                   <p className="font-medium text-gray-900">{article.sku}</p>
-                                  <p className="text-sm text-gray-500">
-                                    {attributes.couleur && `${attributes.couleur} - `}
-                                    {attributes.taille && `${attributes.taille}`}
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    {attributes.couleur && `${attributes.couleur}`}
+                                    {attributes.taille && ` - ${attributes.taille}`}
                                   </p>
                                 </div>
                                 <div className="text-right">
-                                  <p className="text-sm font-bold text-yellow-600">{article.stockActuel}</p>
-                                  <p className="text-xs text-gray-500">en stock</p>
+                                  <p className={`text-sm font-bold ${stockStatus.color}`}>{article.stockActuel} unités</p>
+                                  <p className="text-xs text-gray-500">{stockStatus.label}</p>
                                 </div>
                               </div>
                             )
                           })
                       ) : (
-                        <div className="text-center py-8 text-gray-500">
-                          <CubeIcon className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-                          <p>Aucun article trouvé</p>
-                          <p className="text-sm mt-1">Les articles apparaîtront ici une fois créés</p>
+                        <div className="text-center py-12">
+                          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <ShieldCheckIcon className="h-10 w-10 text-gray-300" />
+                          </div>
+                          <p className="text-gray-500">Aucune alerte stock</p>
+                          <p className="text-sm text-gray-400 mt-1">Tous les niveaux de stock sont bons</p>
                         </div>
                       )}
                     </div>
@@ -572,21 +635,21 @@ export default function BoutiqueDetailPage({ params }: { params: Promise<{ bouti
 
             {/* Products Tab */}
             {activeTab === 'products' && (
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <div className="relative">
-                    <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+              <div className="space-y-6">
+                <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                  <div className="relative w-full sm:w-80">
+                    <MagnifyingGlassIcon className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
                     <input
                       type="text"
                       placeholder="Rechercher un produit..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
+                      className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0f7b6c] focus:border-transparent transition-all"
                     />
                   </div>
                   <button
-                    onClick={() => window.location.href = '/products'}
-                    className="flex items-center px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700"
+                    onClick={() => router.push('/products')}
+                    className="flex items-center px-5 py-2.5 bg-gradient-to-r from-[#0f7b6c] to-[#0a5c50] text-white rounded-xl font-semibold hover:shadow-lg transition-all"
                   >
                     <PlusIcon className="h-5 w-5 mr-2" />
                     Nouveau Produit
@@ -594,62 +657,68 @@ export default function BoutiqueDetailPage({ params }: { params: Promise<{ bouti
                 </div>
 
                 {filteredProducts.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredProducts.map((product) => (
-                    <div key={product.id} className="bg-white border rounded-lg shadow-sm hover:shadow-md transition-shadow">
-                      <div className="h-48 bg-gray-200 rounded-t-lg flex items-center justify-center">
-                        {product.image ? (
-                          <img src={product.image} alt={product.nom} className="h-full w-full object-cover rounded-t-lg" />
-                        ) : (
-                          <PhotoIcon className="h-12 w-12 text-gray-400" />
-                        )}
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-medium text-gray-900 truncate">{product.nom}</h3>
-                        <p className="text-sm text-gray-500 mt-1 line-clamp-2">{product.description}</p>
-                        <div className="mt-3 flex items-center justify-between">
-                          <div className="flex items-center text-sm text-gray-500">
-                            <CubeIcon className="h-4 w-4 mr-1" />
-                            {articles.filter(a => a.produitId === product.id).length} articles
-                          </div>
-                          <div className="flex space-x-2">
-                            <button
-                              onClick={() => {
-                                setSelectedProduct(product)
-                                setShowDetails(true)
-                              }}
-                              className="text-emerald-600 hover:text-emerald-900"
-                            >
-                              <EyeIcon className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={() => window.location.href = `/products/${product.id}/articles`}
-                              className="text-blue-600 hover:text-blue-900"
-                            >
-                              <CubeIcon className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteProduct(product.id)}
-                              className="text-red-600 hover:text-red-900"
-                            >
-                              <TrashIcon className="h-4 w-4" />
-                            </button>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {filteredProducts.map((product) => (
+                      <div key={product.id} className="group bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all hover:-translate-y-1">
+                        <div className="relative h-48 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
+                          {product.image ? (
+                            <img src={`http://10.153.54.247:8080${product.image}`} alt={product.nom} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                          ) : (
+                            <div className="w-full h-full flex flex-col items-center justify-center">
+                              <PhotoIcon className="h-12 w-12 text-gray-400" />
+                              <p className="text-xs text-gray-400 mt-2">Pas d'image</p>
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        </div>
+                        <div className="p-4">
+                          <h3 className="font-semibold text-gray-900 truncate">{product.nom}</h3>
+                          <p className="text-sm text-gray-500 mt-1 line-clamp-2">{product.description}</p>
+                          <div className="mt-3 flex items-center justify-between">
+                            <div className="flex items-center text-sm text-gray-500">
+                              <CubeIcon className="h-4 w-4 mr-1 text-[#0f7b6c]" />
+                              {articles.filter(a => a.produitId === product.id).length} articles
+                            </div>
+                            <div className="flex space-x-1">
+                              <button
+                                onClick={() => {
+                                  setSelectedProduct(product)
+                                  setShowDetails(true)
+                                }}
+                                className="p-1.5 text-[#0f7b6c] hover:bg-gray-100 rounded-lg transition-colors"
+                              >
+                                <EyeIcon className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => router.push(`/products/${product.id}/articles`)}
+                                className="p-1.5 text-blue-600 hover:bg-gray-100 rounded-lg transition-colors"
+                              >
+                                <CubeIcon className="h-4 w-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteProduct(product.id)}
+                                className="p-1.5 text-red-600 hover:bg-gray-100 rounded-lg transition-colors"
+                              >
+                                <TrashIcon className="h-4 w-4" />
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
                 ) : (
-                  <div className="text-center py-12 text-gray-500">
-                    <ShoppingBagIcon className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                  <div className="text-center py-16">
+                    <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <ShoppingBagIcon className="h-12 w-12 text-gray-300" />
+                    </div>
                     <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun produit trouvé</h3>
                     <p className="text-gray-500 mb-4">
                       {searchTerm ? 'Aucun produit ne correspond à votre recherche' : 'Cette boutique n\'a pas encore de produits'}
                     </p>
                     <button
-                      onClick={() => window.location.href = '/products'}
-                      className="inline-flex items-center px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700"
+                      onClick={() => router.push('/products')}
+                      className="inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-[#0f7b6c] to-[#0a5c50] text-white rounded-xl font-semibold hover:shadow-lg transition-all"
                     >
                       <PlusIcon className="h-5 w-5 mr-2" />
                       Créer le premier produit
@@ -661,137 +730,112 @@ export default function BoutiqueDetailPage({ params }: { params: Promise<{ bouti
 
             {/* Articles Tab */}
             {activeTab === 'articles' && (
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <div className="relative">
-                    <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Rechercher un article..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
-                    />
-                  </div>
+              <div className="space-y-6">
+                <div className="relative w-full sm:w-80">
+                  <MagnifyingGlassIcon className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Rechercher un article..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0f7b6c] focus:border-transparent transition-all"
+                  />
                 </div>
 
                 {filteredArticles.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Article
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          SKU
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Attributs
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Prix
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Stock
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {filteredArticles.map((article) => {
-                        const attributes = parseAttributes(article.attributs)
-                        const stockStatus = article.stockActuel === 0 ? 'out' : article.stockActuel < 10 ? 'low' : 'good'
-                        const stockColor = stockStatus === 'out' ? 'text-red-600' : stockStatus === 'low' ? 'text-yellow-600' : 'text-green-600'
-                        
-                        return (
-                          <tr key={article.id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center">
-                                {article.image ? (
-                                  <img
-                                    src={article.image}
-                                    alt={article.sku}
-                                    className="h-10 w-10 object-cover rounded-lg mr-3"
-                                  />
-                                ) : (
-                                  <div className="h-10 w-10 bg-gray-200 rounded-lg flex items-center justify-center mr-3">
-                                    <PhotoIcon className="h-6 w-6 text-gray-400" />
-                                  </div>
-                                )}
-                                <div>
-                                  <div className="text-sm font-medium text-gray-900">
-                                    Article #{article.id}
-                                  </div>
-                                  <div className="text-sm text-gray-500">
-                                    {products.find(p => p.id === article.produitId)?.nom}
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full">
+                      <thead>
+                        <tr className="border-b border-gray-100">
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Article</th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">SKU</th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Attributs</th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Prix</th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Stock</th>
+                          <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-50">
+                        {filteredArticles.map((article) => {
+                          const attributes = parseAttributes(article.attributs)
+                          const stockStatus = getStockStatus(article.stockActuel)
+                          
+                          return (
+                            <tr key={article.id} className="hover:bg-gray-50 transition-colors">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center">
+                                  {article.image ? (
+                                    <img src={`http://10.153.54.247:8080${article.image}`} alt={article.sku} className="h-10 w-10 object-cover rounded-lg mr-3" />
+                                  ) : (
+                                    <div className="h-10 w-10 bg-gray-100 rounded-lg flex items-center justify-center mr-3">
+                                      <PhotoIcon className="h-5 w-5 text-gray-400" />
+                                    </div>
+                                  )}
+                                  <div>
+                                    <div className="text-sm font-medium text-gray-900">
+                                      Article #{article.id}
+                                    </div>
+                                    <div className="text-xs text-gray-500">
+                                      {products.find(p => p.id === article.produitId)?.nom}
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="text-sm font-mono text-gray-900">{article.sku}</span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm text-gray-900">
-                                {Object.entries(attributes).map(([key, value]) => (
-                                  <div key={key} className="flex items-center space-x-2">
-                                    <span className="text-gray-500 capitalize">{key}:</span>
-                                    <span className="font-medium">{value as string}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="text-sm font-bold text-emerald-600">
-                                {formatCurrency(article.prix)}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className={`text-sm font-bold ${stockColor}`}>
-                                {article.stockActuel}
-                              </div>
-                              {article.stockActuel === 0 && (
-                                <span className="text-xs text-red-600">Rupture</span>
-                              )}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <div className="flex space-x-2">
-                                <button
-                                  onClick={() => {
-                                    setSelectedArticle(article)
-                                    window.location.href = `/products/${article.produitId}/articles`
-                                  }}
-                                  className="text-blue-600 hover:text-blue-900"
-                                  title="Gérer les articles du produit"
-                                >
-                                  <CubeIcon className="h-4 w-4" />
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteArticle(article.id)}
-                                  className="text-red-600 hover:text-red-900"
-                                  title="Supprimer"
-                                >
-                                  <TrashIcon className="h-4 w-4" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        )
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                               </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className="text-sm font-mono text-gray-900">{article.sku}</span>
+                               </td>
+                              <td className="px-6 py-4">
+                                <div className="flex flex-wrap gap-1">
+                                  {Object.entries(attributes).map(([key, value]) => (
+                                    <span key={key} className="inline-flex items-center px-2 py-0.5 rounded text-xs bg-gray-100 text-gray-700">
+                                      {key}: {value as string}
+                                    </span>
+                                  ))}
+                                </div>
+                               </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className="text-sm font-bold text-[#0f7b6c]">{formatCurrency(article.prix)}</span>
+                               </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex flex-col">
+                                  <span className={`text-sm font-bold ${stockStatus.color}`}>{article.stockActuel}</span>
+                                  <span className="text-xs text-gray-500">{stockStatus.label}</span>
+                                </div>
+                               </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex space-x-2">
+                                  <button
+                                    onClick={() => router.push(`/products/${article.produitId}/articles`)}
+                                    className="p-1.5 text-blue-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                    title="Gérer les articles"
+                                  >
+                                    <CubeIcon className="h-4 w-4" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleDeleteArticle(article.id)}
+                                    className="p-1.5 text-red-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                    title="Supprimer"
+                                  >
+                                    <TrashIcon className="h-4 w-4" />
+                                  </button>
+                                </div>
+                               </td>
+                             </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
                 ) : (
-                  <div className="text-center py-12 text-gray-500">
-                    <CubeIcon className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                  <div className="text-center py-16">
+                    <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <CubeIcon className="h-12 w-12 text-gray-300" />
+                    </div>
                     <h3 className="text-lg font-medium text-gray-900 mb-2">Aucun article trouvé</h3>
                     <p className="text-gray-500 mb-4">
                       {searchTerm ? 'Aucun article ne correspond à votre recherche' : 'Aucun article trouvé pour les produits de cette boutique'}
                     </p>
-                    <div className="space-y-2 text-sm text-gray-400">
+                    <div className="inline-flex flex-col items-center gap-2 text-sm text-gray-400 bg-gray-50 rounded-xl p-4">
                       <p>• Créez d'abord des produits pour cette boutique</p>
                       <p>• Ajoutez ensuite des articles à chaque produit</p>
                     </div>
@@ -802,155 +846,157 @@ export default function BoutiqueDetailPage({ params }: { params: Promise<{ bouti
           </div>
         </div>
 
-        {/* Edit Boutique Modal */}
+        {/* Edit Boutique Modal Modernisé */}
         {showEditModal && boutique && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-              <div className="mt-3">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Modifier la boutique</h3>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
-                    <input
-                      type="text"
-                      value={editForm.nom}
-                      onChange={(e) => setEditForm({...editForm, nom: e.target.value})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                    <textarea
-                      value={editForm.description}
-                      onChange={(e) => setEditForm({...editForm, description: e.target.value})}
-                      rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Adresse</label>
-                    <input
-                      type="text"
-                      value={editForm.addresse}
-                      onChange={(e) => setEditForm({...editForm, addresse: e.target.value})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Statut</label>
-                    <select
-                      value={editForm.statut}
-                      onChange={(e) => setEditForm({...editForm, statut: e.target.value})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
-                      required
-                    >
-                      <option value="EN_ATTENTE">En attente</option>
-                      <option value="VALIDE">Validé</option>
-                      <option value="REFUSE">Refusé</option>
-                      <option value="SUSPENDU">Suspendu</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Note</label>
-                    <input
-                      type="number"
-                      value={editForm.note}
-                      onChange={(e) => setEditForm({...editForm, note: parseFloat(e.target.value)})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
-                      min="0"
-                      max="5"
-                      step="0.1"
-                      required
-                    />
-                  </div>
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 bg-white border-b border-gray-100 px-6 py-4 flex justify-between items-center">
+                <h3 className="text-xl font-bold text-gray-900">Modifier la boutique</h3>
+                <button
+                  onClick={() => setShowEditModal(false)}
+                  className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  <XMarkIcon className="h-5 w-5 text-gray-500" />
+                </button>
+              </div>
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Nom</label>
+                  <input
+                    type="text"
+                    value={editForm.nom}
+                    onChange={(e) => setEditForm({...editForm, nom: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0f7b6c] focus:border-transparent"
+                    required
+                  />
                 </div>
-
-                <div className="mt-6 flex justify-end space-x-3">
-                  <button
-                    onClick={() => setShowEditModal(false)}
-                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-                  >
-                    Annuler
-                  </button>
-                  <button
-                    onClick={handleUpdateBoutique}
-                    className="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700"
-                  >
-                    Modifier
-                  </button>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                  <textarea
+                    value={editForm.description}
+                    onChange={(e) => setEditForm({...editForm, description: e.target.value})}
+                    rows={3}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0f7b6c] focus:border-transparent"
+                    required
+                  />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Adresse</label>
+                  <input
+                    type="text"
+                    value={editForm.addresse}
+                    onChange={(e) => setEditForm({...editForm, addresse: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0f7b6c] focus:border-transparent"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Statut</label>
+                  <select
+                    value={editForm.statut}
+                    onChange={(e) => setEditForm({...editForm, statut: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0f7b6c] focus:border-transparent"
+                  >
+                    <option value="EN_ATTENTE">En attente</option>
+                    <option value="VALIDE">Validé</option>
+                    <option value="REFUSE">Refusé</option>
+                    <option value="SUSPENDU">Suspendu</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Note (0-5)</label>
+                  <input
+                    type="number"
+                    value={editForm.note}
+                    onChange={(e) => setEditForm({...editForm, note: parseFloat(e.target.value)})}
+                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#0f7b6c] focus:border-transparent"
+                    min="0"
+                    max="5"
+                    step="0.1"
+                  />
+                </div>
+              </div>
+              <div className="sticky bottom-0 bg-white border-t border-gray-100 px-6 py-4 flex gap-3">
+                <button
+                  onClick={() => setShowEditModal(false)}
+                  className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
+                >
+                  Annuler
+                </button>
+                <button
+                  onClick={handleUpdateBoutique}
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-[#0f7b6c] to-[#0a5c50] text-white rounded-xl hover:shadow-lg transition-all font-medium"
+                >
+                  Enregistrer
+                </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* Product Details Modal */}
+        {/* Product Details Modal Modernisé */}
         {showDetails && selectedProduct && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-              <div className="mt-3">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl max-w-md w-full">
+              <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-medium text-gray-900">Détails du produit</h3>
+                  <h3 className="text-xl font-bold text-gray-900">Détails du produit</h3>
                   <button
                     onClick={() => setShowDetails(false)}
-                    className="text-gray-400 hover:text-gray-500"
+                    className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
                   >
-                    <ExclamationTriangleIcon className="h-6 w-6" />
+                    <XMarkIcon className="h-5 w-5 text-gray-500" />
                   </button>
                 </div>
                 
                 <div className="space-y-4">
-                  <div className="h-48 bg-gray-200 rounded-lg flex items-center justify-center">
+                  <div className="h-48 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center overflow-hidden">
                     {selectedProduct.image ? (
-                      <img src={selectedProduct.image} alt={selectedProduct.nom} className="h-full w-full object-cover rounded-lg" />
+                      <img src={`http://10.153.54.247:8080${selectedProduct.image}`} alt={selectedProduct.nom} className="w-full h-full object-cover" />
                     ) : (
                       <PhotoIcon className="h-12 w-12 text-gray-400" />
                     )}
                   </div>
-                  
                   <div>
-                    <h4 className="font-medium text-gray-900">{selectedProduct.nom}</h4>
+                    <h4 className="font-semibold text-gray-900 text-lg">{selectedProduct.nom}</h4>
                     <p className="text-sm text-gray-600 mt-1">{selectedProduct.description}</p>
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 rounded-xl">
                     <div>
-                      <p className="text-sm text-gray-500">Catégorie</p>
-                      <p className="font-medium">{selectedProduct.sousCategorie?.categorie?.nom}</p>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">Catégorie</p>
+                      <p className="font-medium text-gray-900 mt-1">{selectedProduct.sousCategorie?.categorie?.nom || 'Non défini'}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Sous-catégorie</p>
-                      <p className="font-medium">{selectedProduct.sousCategorie?.nom}</p>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">Sous-catégorie</p>
+                      <p className="font-medium text-gray-900 mt-1">{selectedProduct.sousCategorie?.nom || 'Non défini'}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Statut</p>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(selectedProduct.statut)}`}>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">Statut</p>
+                      <span className={`inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium mt-1 ${getStatusColor(selectedProduct.statut)}`}>
                         {selectedProduct.statut}
                       </span>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Articles</p>
-                      <p className="font-medium">{articles.filter(a => a.produitId === selectedProduct.id).length}</p>
+                      <p className="text-xs text-gray-500 uppercase tracking-wide">Articles</p>
+                      <p className="font-medium text-gray-900 mt-1">{articles.filter(a => a.produitId === selectedProduct.id).length}</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-6 flex justify-end space-x-3">
+                <div className="mt-6 flex gap-3">
                   <button
                     onClick={() => setShowDetails(false)}
-                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                    className="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium"
                   >
                     Fermer
                   </button>
                   <button
                     onClick={() => {
                       setShowDetails(false)
-                      window.location.href = `/products/${selectedProduct.id}/articles`
+                      router.push(`/products/${selectedProduct.id}/articles`)
                     }}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                    className="flex-1 px-4 py-2 bg-gradient-to-r from-[#0f7b6c] to-[#0a5c50] text-white rounded-xl hover:shadow-lg transition-all font-medium"
                   >
                     Voir les articles
                   </button>

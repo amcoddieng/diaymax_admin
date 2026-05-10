@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://192.168.1.8:8080'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://10.153.54.247:8080"
+console.log("s",process.env.NEXT_PUBLIC_API_URL || "http://10.153.54.247:8080")
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -52,6 +53,7 @@ export const authService = {
     listAccounts: () =>
       api.get('/api/auth/diagnostic/list-accounts')
   }
+  
 }
 
 export default api

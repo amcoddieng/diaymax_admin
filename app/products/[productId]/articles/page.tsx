@@ -306,7 +306,7 @@ export default function ProductArticlesPage({ params }: { params: Promise<{ prod
             <div className="flex items-center space-x-4">
               {product.image && (
                 <img
-                  src={product.image}
+                  src={`http://10.154.66.76:8080+${product.image}`}
                   alt={product.nom}
                   className="h-16 w-16 object-cover rounded-lg"
                 />
@@ -395,7 +395,7 @@ export default function ProductArticlesPage({ params }: { params: Promise<{ prod
                         <div className="flex items-center">
                           {article.image ? (
                             <img
-                              src={article.image}
+                              src={`http://10.154.66.76:8080${article.image}`}
                               alt={article.sku}
                               className="h-10 w-10 object-cover rounded-lg mr-3"
                             />
@@ -842,7 +842,7 @@ export default function ProductArticlesPage({ params }: { params: Promise<{ prod
                     <div>
                       <p className="text-sm text-gray-500 mb-2">Image</p>
                       <img
-                        src={selectedArticle.image}
+                        src={`http://10.154.66.76:8080${selectedArticle.image}`}
                         alt={selectedArticle.sku}
                         className="h-32 w-32 object-cover rounded-lg"
                       />

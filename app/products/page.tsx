@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import AdminLayout from '@/components/layout/AdminLayout'
 import { productAPI, boutiqueAPI, categoryAPI, subCategoryAPI } from '@/lib/api'
 import { formatDate, formatCurrency, getStatusColor } from '@/lib/utils'
@@ -56,6 +57,7 @@ interface SubCategory {
 }
 
 export default function ProductsPage() {
+  const router = useRouter()
   const [products, setProducts] = useState<Product[]>([])
   const [boutiques, setBoutiques] = useState<Boutique[]>([])
   const [categories, setCategories] = useState<Category[]>([])
@@ -320,7 +322,7 @@ export default function ProductsPage() {
               <div className="h-48 bg-gray-200 relative">
                 {product.image ? (
                   <img
-                    src={`http://192.168.1.8:8080${product.image}`}
+                    src={`http://10.154.66.76:8080${product.image}`}
                     alt={product.nom}
                     className="w-full h-full object-cover"
                   />
@@ -384,7 +386,7 @@ export default function ProductsPage() {
                     </button>
                   </div>
                   <button
-                    onClick={() => window.location.href = `/products/${product.id}/articles`}
+                    onClick={() => router.push(`/products/${product.id}/articles`)}
                     className="w-full flex items-center justify-center px-2 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
                   >
                     <CubeIcon className="h-4 w-4 mr-1" />
@@ -458,7 +460,7 @@ export default function ProductsPage() {
                   <div className="h-48 bg-gray-200 rounded-lg flex items-center justify-center">
                     {selectedProduct.image ? (
                       <img
-                        src={`http://192.168.1.8:8080${selectedProduct.image}`}
+                        src={`http://10.154.66.76:8080${selectedProduct.image}`}
                         alt={selectedProduct.nom}
                         className="w-full h-full object-cover rounded-lg"
                       />
