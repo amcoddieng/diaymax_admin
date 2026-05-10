@@ -64,8 +64,13 @@ export const boutiqueService = {
   updateBoutiqueNote: (id: number, note: number) =>
     api.put(`/api/boutiques/${id}/note?note=${note}`),
   
-  updateBoutiqueStatus: (id: number, statut: string) =>
-    api.put(`/api/boutiques/${id}/statut?statut=${statut}`),
+  updateBoutiqueStatus: (id: number, statut: string) => {
+    const formData = new URLSearchParams()
+    formData.append('statut', statut)
+    return api.put(`/api/boutiques/${id}/statut`, formData, {
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    })
+  },
   
   getBoutiquesByVendeur: (vendeurId: number) =>
     api.get(`/api/boutiques/vendeur/${vendeurId}`),

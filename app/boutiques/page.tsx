@@ -132,6 +132,7 @@ export default function BoutiquesPage() {
     }
   }
 
+  
   const handleEdit = (boutique: Boutique) => {
     setSelectedBoutique(boutique)
     setEditForm({
