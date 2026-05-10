@@ -174,11 +174,16 @@ export default function BoutiquesPage() {
     }
   }
 
-  const filteredBoutiques = (Array.isArray(boutiques) ? boutiques : []).filter(boutique =>
-    boutique.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    boutique.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    boutique.addresse.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredBoutiques = (Array.isArray(boutiques) ? boutiques : []).filter(boutique => {
+    const matchesSearch = 
+      boutique.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      boutique.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      boutique.addresse.toLowerCase().includes(searchTerm.toLowerCase())
+    
+    const matchesStatus = !statusFilter || boutique.statut === statusFilter
+    
+    return matchesSearch && matchesStatus
+  })
 
   const itemsPerPage = 10
   const totalPages = Math.ceil(filteredBoutiques.length / itemsPerPage)
