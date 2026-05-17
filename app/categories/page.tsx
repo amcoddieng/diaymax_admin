@@ -150,13 +150,26 @@ export default function CategoriesPage() {
 
   const handleCreateSubCategory = async () => {
     try {
+      // Vérifier que le categorie_id est bien défini
+      if (!subCategoryForm.categorieId || subCategoryForm.categorieId === 0) {
+        alert('Veuillez sélectionner une catégorie valide')
+        return
+      }
+      
+      console.log('📦 DONNÉES ENTRANTES POUR LA CRÉATION DE SOUS-CATÉGORIE:')
+      console.log('📦 categorieId:', subCategoryForm.categorieId)
+      console.log('📦 nom:', subCategoryForm.nom)
+      console.log('📦 description:', subCategoryForm.description)
+      console.log('📦 FORMULAIRE COMPLET:', subCategoryForm)
+      
       await subCategoryService.createSubCategory(subCategoryForm)
       fetchSubCategories()
       fetchCategories()
       setShowSubCategoryModal(false)
       setSubCategoryForm({ categorieId: 0, nom: '', description: '' })
     } catch (error) {
-      console.error('Error creating subcategory:', error)
+      console.error('❌ ERREUR LORS DE LA CRÉATION DE SOUS-CATÉGORIE:', error)
+      console.error('❌ DONNÉES ENVOYÉES AU BACKEND:', subCategoryForm)
     }
   }
 
@@ -164,6 +177,13 @@ export default function CategoriesPage() {
     if (!editingSubCategory) return
 
     try {
+      console.log('📦 DONNÉES POUR LA MODIFICATION DE SOUS-CATÉGORIE:')
+      console.log('📦 ID de la sous-catégorie:', editingSubCategory.id)
+      console.log('📦 categorieId:', subCategoryForm.categorieId)
+      console.log('📦 nom:', subCategoryForm.nom)
+      console.log('📦 description:', subCategoryForm.description)
+      console.log('📦 FORMULAIRE COMPLET:', subCategoryForm)
+      
       await subCategoryService.updateSubCategory(editingSubCategory.id, subCategoryForm)
       fetchSubCategories()
       fetchCategories()
@@ -171,7 +191,8 @@ export default function CategoriesPage() {
       setEditingSubCategory(null)
       setSubCategoryForm({ categorieId: 0, nom: '', description: '' })
     } catch (error) {
-      console.error('Error updating subcategory:', error)
+      console.error('❌ ERREUR LORS DE LA MODIFICATION DE SOUS-CATÉGORIE:', error)
+      console.error('❌ DONNÉES ENVOYÉES AU BACKEND:', subCategoryForm)
     }
   }
 
@@ -241,44 +262,44 @@ export default function CategoriesPage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Gestion des Catégories</h1>
-            <p className="text-gray-600">Gérez les catégories et sous-catégories de produits</p>
+            <h1 className="text-lg font-bold text-gray-900">Gestion des Catégories</h1>
+            <p className="text-xs text-gray-600">Gérez les catégories et sous-catégories</p>
           </div>
-          <div className="flex space-x-3">
+          <div className="flex space-x-2">
             <button
               onClick={() => openSubCategoryModal()}
-              className="flex items-center px-4 py-2 bg-secondary-600 text-white rounded-md hover:bg-secondary-700 transition-colors"
+              className="flex items-center px-2 py-1 text-xs bg-secondary-600 text-white rounded hover:bg-secondary-700 transition-colors"
             >
-              <PlusIcon className="h-5 w-5 mr-2" />
+              <PlusIcon className="h-3 w-3 mr-1" />
               Sous-catégorie
             </button>
             <button
               onClick={() => openCategoryModal()}
-              className="flex items-center px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors"
+              className="flex items-center px-2 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors"
             >
-              <PlusIcon className="h-5 w-5 mr-2" />
+              <PlusIcon className="h-3 w-3 mr-1" />
               Catégorie
             </button>
           </div>
         </div>
 
         {/* Search */}
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="flex space-x-4">
+        <div className="bg-white p-2 rounded-lg shadow">
+          <div className="flex space-x-2">
             <div className="flex-1 relative">
               <input
                 type="text"
-                placeholder="Rechercher par nom ou description..."
+                placeholder="Rechercher..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded focus:ring-emerald-500 focus:border-emerald-500"
               />
-              <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+              <MagnifyingGlassIcon className="absolute left-2 top-1.5 h-3 w-3 text-gray-400" />
             </div>
             <button
               onClick={handleSearch}
-              className="px-4 py-2 bg-secondary-600 text-white rounded-md hover:bg-secondary-700 transition-colors"
+              className="px-2 py-1 text-xs bg-secondary-600 text-white rounded hover:bg-secondary-700 transition-colors"
             >
               Rechercher
             </button>
@@ -291,53 +312,53 @@ export default function CategoriesPage() {
             {filteredCategories.map((category) => (
               <div key={category.id} className="border-b border-gray-200 last:border-b-0">
                 {/* Category Header */}
-                <div className="p-4 hover:bg-gray-50">
+                <div className="p-2 hover:bg-gray-50">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3 flex-1">
+                    <div className="flex items-center space-x-2 flex-1">
                       <button
                         onClick={() => toggleCategoryExpansion(category.id)}
-                        className="p-1 hover:bg-gray-200 rounded"
+                        className="p-0.5 hover:bg-gray-200 rounded"
                       >
                         {expandedCategories.has(category.id) ? (
-                          <ChevronDownIcon className="h-5 w-5 text-gray-500" />
+                          <ChevronDownIcon className="h-3 w-3 text-gray-500" />
                         ) : (
-                          <ChevronRightIcon className="h-5 w-5 text-gray-500" />
+                          <ChevronRightIcon className="h-3 w-3 text-gray-500" />
                         )}
                       </button>
-                      <div className="flex items-center space-x-2">
-                        <TagIcon className="h-5 w-5 text-emerald-500" />
-                        <h3 className="text-lg font-medium text-gray-900">{category.nom}</h3>
+                      <div className="flex items-center space-x-1">
+                        <TagIcon className="h-3 w-3 text-emerald-500" />
+                        <h3 className="text-sm font-medium text-gray-900">{category.nom}</h3>
                       </div>
-                      <span className="text-sm text-gray-500">
+                      <span className="text-xs text-gray-500">
                         {category.sousCategories?.length || 0} sous-catégorie(s)
                       </span>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-1">
                       <button
                         onClick={() => openSubCategoryModal(undefined, category.id)}
-                        className="p-2 text-secondary-600 hover:text-secondary-900"
+                        className="p-1 text-secondary-600 hover:text-secondary-900"
                         title="Ajouter une sous-catégorie"
                       >
-                        <PlusIcon className="h-4 w-4" />
+                        <PlusIcon className="h-3 w-3" />
                       </button>
                       <button
                         onClick={() => openCategoryModal(category)}
-                        className="p-2 text-emerald-600 hover:text-emerald-900"
+                        className="p-1 text-emerald-600 hover:text-emerald-900"
                         title="Modifier"
                       >
-                        <PencilIcon className="h-4 w-4" />
+                        <PencilIcon className="h-3 w-3" />
                       </button>
                       <button
                         onClick={() => handleDeleteCategory(category.id)}
-                        className="p-2 text-red-600 hover:text-red-900"
+                        className="p-1 text-red-600 hover:text-red-900"
                         title="Supprimer"
                       >
-                        <TrashIcon className="h-4 w-4" />
+                        <TrashIcon className="h-3 w-3" />
                       </button>
                     </div>
                   </div>
-                  <p className="mt-2 text-sm text-gray-600 ml-8">{category.description}</p>
-                  <p className="mt-1 text-xs text-gray-500 ml-8">
+                  <p className="mt-1 text-xs text-gray-600 ml-6">{category.description}</p>
+                  <p className="mt-0.5 text-xs text-gray-500 ml-6">
                     Créée le {formatDate(category.createdAt)}
                   </p>
                 </div>
@@ -348,32 +369,32 @@ export default function CategoriesPage() {
                     {category.sousCategories.length > 0 ? (
                       <div className="divide-y divide-gray-200">
                         {category.sousCategories.map((subCategory) => (
-                          <div key={subCategory.id} className="p-3 pl-12 hover:bg-gray-100">
+                          <div key={subCategory.id} className="p-2 pl-8 hover:bg-gray-100">
                             <div className="flex items-center justify-between">
                               <div className="flex-1">
-                                <div className="flex items-center space-x-2">
-                                  <TagIcon className="h-4 w-4 text-secondary-500" />
-                                  <h4 className="text-sm font-medium text-gray-900">{subCategory.nom}</h4>
+                                <div className="flex items-center space-x-1">
+                                  <TagIcon className="h-3 w-3 text-secondary-500" />
+                                  <h4 className="text-xs font-medium text-gray-900">{subCategory.nom}</h4>
                                 </div>
-                                <p className="mt-1 text-xs text-gray-600 ml-6">{subCategory.description}</p>
-                                <p className="mt-1 text-xs text-gray-500 ml-6">
+                                <p className="mt-0.5 text-xs text-gray-600 ml-4">{subCategory.description}</p>
+                                <p className="mt-0.5 text-xs text-gray-500 ml-4">
                                   Créée le {formatDate(subCategory.createdAt)}
                                 </p>
                               </div>
-                              <div className="flex items-center space-x-2">
+                              <div className="flex items-center space-x-1">
                                 <button
                                   onClick={() => openSubCategoryModal(subCategory)}
-                                  className="p-1 text-emerald-600 hover:text-emerald-900"
+                                  className="p-0.5 text-emerald-600 hover:text-emerald-900"
                                   title="Modifier"
                                 >
-                                  <PencilIcon className="h-4 w-4" />
+                                  <PencilIcon className="h-3 w-3" />
                                 </button>
                                 <button
                                   onClick={() => handleDeleteSubCategory(subCategory.id)}
-                                  className="p-1 text-red-600 hover:text-red-900"
+                                  className="p-0.5 text-red-600 hover:text-red-900"
                                   title="Supprimer"
                                 >
-                                  <TrashIcon className="h-4 w-4" />
+                                  <TrashIcon className="h-3 w-3" />
                                 </button>
                               </div>
                             </div>
@@ -381,7 +402,7 @@ export default function CategoriesPage() {
                         ))}
                       </div>
                     ) : (
-                      <div className="p-4 text-center text-gray-500">
+                      <div className="p-2 text-center text-gray-500 text-xs">
                         Aucune sous-catégorie pour cette catégorie
                       </div>
                     )}
@@ -392,10 +413,10 @@ export default function CategoriesPage() {
           </div>
 
           {filteredCategories.length === 0 && (
-            <div className="p-8 text-center text-gray-500">
-              <TagIcon className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-sm font-medium text-gray-900">Aucune catégorie trouvée</h3>
-              <p className="mt-1 text-sm text-gray-500">
+            <div className="p-4 text-center text-gray-500">
+              <TagIcon className="mx-auto h-8 w-8 text-gray-400" />
+              <h3 className="mt-2 text-xs font-medium text-gray-900">Aucune catégorie trouvée</h3>
+              <p className="mt-1 text-xs text-gray-500">
                 {searchTerm ? 'Essayez une autre recherche' : 'Commencez par ajouter une catégorie'}
               </p>
             </div>

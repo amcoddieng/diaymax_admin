@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://10.153.54.247:8080"
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://192.168.43.97:8080"
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -40,8 +40,8 @@ export const documentService = {
   getDocuments: () =>
     api.get('/api/documents'),
   
-  getDocumentsByPerson: (personId: number) =>
-    api.get(`/api/documents/personne/${personId}`),
+  getDocumentsByPerson: (personneId: number) =>
+    api.get(`/api/documents/personne/${personneId}`),
   
   getDocumentsByType: (type: string) =>
     api.get(`/api/documents/type/${type}`),
@@ -49,10 +49,16 @@ export const documentService = {
   getDocumentsByValidation: (validated: boolean) =>
     api.get(`/api/documents/validated/${validated}`),
   
-  createDocument: (formData: FormData) =>
-    api.post('/api/documents/with-file', formData, {
+  createDocument: (personneId: number, type: string, file: File) => {
+    const formData = new FormData()
+    formData.append('personneId', personneId.toString())
+    formData.append('type', type)
+    formData.append('file', file)
+    
+    return api.post('/api/documents/with-file', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
-    }),
+    })
+  },
   
   updateDocument: (id: number, data: any) =>
     api.put(`/api/documents/${id}`, data),
@@ -60,10 +66,25 @@ export const documentService = {
   validateDocument: (id: number) =>
     api.put(`/api/documents/${id}/validate`),
   
-  updateDocumentFile: (id: number, formData: FormData) =>
-    api.post(`/api/documents/${id}/file`, formData, {
+  updateDocumentFile: (id: number, file: File) => {
+    const formData = new FormData()
+    formData.append('file', file)
+    
+    return api.post(`/api/documents/${id}/file`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
-    }),
+    })
+  },
+  
+  deleteDocument: (id: number) =>
+    api.delete(`/api/documents/${id}`),
+  
+  // Types de documents disponibles
+  DOCUMENT_TYPES: {
+    CARTE_IDENTITE: 'CARTE_IDENTITE',
+    NINEA: 'NINEA',
+    PASSPORT: 'PASSPORT',
+    RCCM: 'RCCM'
+  } as const
 }
 
 export default api

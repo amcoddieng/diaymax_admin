@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://10.153.54.247:8080"
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://192.168.43.97:8080"
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -47,8 +47,8 @@ export const articleService = {
     image?: string
   }) => api.post('/api/articles', data),
   
-  createArticleWithImage: (formData: FormData) =>
-    api.post('/api/articles/with-image', formData, {
+  createArticleWithImage: (produitId: number, formData: FormData) =>
+    api.post(`/api/articles/with-image?produitId=${produitId}`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

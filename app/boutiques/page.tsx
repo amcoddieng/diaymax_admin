@@ -229,44 +229,44 @@ export default function BoutiquesPage() {
 
   return (
     <AdminLayout>
-      <div className="p-2 space-y-2">
+      <div className="p-1 space-y-1">
         {/* Header avec design moderne */}
-        <div className="relative overflow-hidden rounded-xl bg-gradient-to-r from-[#0f7b6c] to-[#0a5c50] p-4 text-white">
+        <div className="relative overflow-hidden rounded-lg bg-gradient-to-r from-[#0f7b6c] to-[#0a5c50] p-2 text-white">
           <div className="relative z-10">
             <div className="flex justify-between items-start">
               <div>
-                <h1 className="text-base font-bold mb-1">Gestion des Boutiques</h1>
+                <h1 className="text-sm font-bold mb-0.5">Gestion des Boutiques</h1>
                 <p className="text-emerald-100 text-xs">Gérez toutes les boutiques et leurs statuts</p>
               </div>
-              <button className="flex items-center px-3 py-2 bg-[#ffc300] text-gray-900 rounded-lg font-semibold hover:bg-[#e5b000] transition-all transform hover:scale-105 shadow-lg">
-                <PlusIcon className="h-4 w-4 mr-2" />
+              <button className="flex items-center px-2 py-1 bg-[#ffc300] text-gray-900 rounded font-semibold hover:bg-[#e5b000] transition-all transform hover:scale-105 shadow-lg">
+                <PlusIcon className="h-3 w-3 mr-1" />
                 Nouvelle boutique
               </button>
             </div>
           </div>
           {/* Decorative elements */}
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -mr-32 -mt-32"></div>
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#ffc300] opacity-10 rounded-full -ml-24 -mb-24"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-full -mr-16 -mt-16"></div>
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-[#ffc300] opacity-10 rounded-full -ml-12 -mb-12"></div>
         </div>
 
         {/* Search and Filters modernisés */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4">
-          <div className="flex flex-col lg:flex-row gap-2">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-2">
+          <div className="flex flex-col lg:flex-row gap-1">
             <div className="flex-1 relative">
               <input
                 type="text"
-                placeholder="Rechercher une boutique..."
+                placeholder="Rechercher..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-                className="w-full pl-7 pr-3 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#0f7b6c] focus:border-transparent text-sm"
+                className="w-full pl-6 pr-2 py-1 border border-gray-200 rounded focus:ring-1 focus:ring-[#0f7b6c] focus:border-transparent text-xs"
               />
-              <MagnifyingGlassIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400" />
+              <MagnifyingGlassIcon className="absolute left-1.5 top-1/2 transform -translate-y-1/2 h-3 w-3 text-gray-400" />
             </div>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-2 py-1.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#0f7b6c] focus:border-transparent text-sm bg-white"
+              className="px-1.5 py-1 border border-gray-200 rounded focus:ring-1 focus:ring-[#0f7b6c] focus:border-transparent text-xs bg-white"
             >
               <option value="">Tous les statuts</option>
               <option value="EN_ATTENTE">En attente</option>
@@ -276,7 +276,7 @@ export default function BoutiquesPage() {
             </select>
             <button
               onClick={handleSearch}
-              className="px-3 py-1.5 bg-gradient-to-r from-[#0f7b6c] to-[#0a5c50] text-white rounded-lg hover:shadow-md transition-all text-sm"
+              className="px-2 py-1 bg-gradient-to-r from-[#0f7b6c] to-[#0a5c50] text-white rounded hover:shadow-md transition-all text-xs"
             >
               Rechercher
             </button>
@@ -284,22 +284,22 @@ export default function BoutiquesPage() {
         </div>
 
         {/* Statistiques rapides */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-1">
-          <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg p-2">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-0.5">
+          <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded p-1.5">
             <p className="text-emerald-600 text-xs font-medium">Total boutiques</p>
-            <p className="text-lg font-bold text-emerald-900">{boutiques.length}</p>
+            <p className="text-sm font-bold text-emerald-900">{boutiques.length}</p>
           </div>
-          <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-lg p-2">
+          <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded p-1.5">
             <p className="text-amber-600 text-xs font-medium">En attente</p>
-            <p className="text-lg font-bold text-amber-900">{boutiques.filter(b => b.statut === 'EN_ATTENTE').length}</p>
+            <p className="text-sm font-bold text-amber-900">{boutiques.filter(b => b.statut === 'EN_ATTENTE').length}</p>
           </div>
-          <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg p-2">
+          <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded p-1.5">
             <p className="text-emerald-600 text-xs font-medium">Validées</p>
-            <p className="text-lg font-bold text-emerald-900">{boutiques.filter(b => b.statut === 'VALIDE').length}</p>
+            <p className="text-sm font-bold text-emerald-900">{boutiques.filter(b => b.statut === 'VALIDE').length}</p>
           </div>
-          <div className="bg-gradient-to-r from-[#0f7b6c] to-[#0a5c50] p-2 rounded-lg">
+          <div className="bg-gradient-to-r from-[#0f7b6c] to-[#0a5c50] p-1.5 rounded">
             <p className="text-[#d4a000] text-xs font-medium">Note moyenne</p>
-            <p className="text-lg font-bold text-gray-900">
+            <p className="text-sm font-bold text-gray-900">
               {(boutiques.reduce((acc, b) => acc + b.note, 0) / boutiques.length || 0).toFixed(1)}
               <span className="text-xs ml-1">⭐</span>
             </p>
@@ -307,15 +307,15 @@ export default function BoutiquesPage() {
         </div>
 
         {/* Boutiques Grid modernisé */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-0.5">
           {paginatedBoutiques.map((boutique) => (
-            <div key={boutique.id} className="group bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300">
+            <div key={boutique.id} className="group bg-white rounded shadow-sm border border-gray-100 overflow-hidden hover:shadow transition-all duration-300">
               {/* Image section avec overlay gradient */}
-              <div className="relative h-32 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
+              <div className="relative h-24 overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
                 {boutique.logo ? (
                   <>
                     <img
-                      src={`http://10.153.54.247:8080${boutique.logo}`}
+                      src={`http://192.168.43.97:8080${boutique.logo}`}
                       alt={boutique.nom}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
@@ -324,15 +324,15 @@ export default function BoutiquesPage() {
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
                     <div className="text-center">
-                      <BuildingStorefrontIcon className="h-12 w-12 text-gray-300 mx-auto mb-1" />
+                      <BuildingStorefrontIcon className="h-8 w-8 text-gray-300 mx-auto mb-1" />
                       <p className="text-gray-400 text-xs">Pas de logo</p>
                     </div>
                   </div>
                 )}
                 
                 {/* Badge statut moderne */}
-                <div className="absolute top-3 right-3">
-                  <span className={`inline-flex items-center px-2 py-1 text-xs font-semibold rounded-lg border backdrop-blur-sm ${getStatusStyle(boutique.statut)}`}>
+                <div className="absolute top-2 right-2">
+                  <span className={`inline-flex items-center px-1 py-0.5 text-xs font-semibold rounded border backdrop-blur-sm ${getStatusStyle(boutique.statut)}`}>
                     {getStatusIcon(boutique.statut)}
                     {boutique.statut === 'EN_ATTENTE' && 'En attente'}
                     {boutique.statut === 'VALIDE' && 'Validé'}
@@ -342,51 +342,51 @@ export default function BoutiquesPage() {
                 </div>
 
                 {/* Note badge */}
-                <div className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm rounded-lg px-2 py-1">
-                  <div className="flex items-center text-xs text-gray-600 mb-1">
-                    <MapPinIcon className="h-3 w-3 mr-1" />
+                <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-sm rounded px-1 py-0.5">
+                  <div className="flex items-center text-xs text-gray-600">
+                    <MapPinIcon className="h-2 w-2 mr-0.5" />
                     <span className="truncate">{boutique.addresse || 'Non spécifiée'}</span>
                   </div>
                 </div>
               </div>
               
               {/* Content section */}
-              <div className="p-4">
-                <h3 className="text-lg font-bold text-gray-900 mb-2 line-clamp-1">{boutique.nom}</h3>
-                <p className="text-xs text-gray-600 line-clamp-2 mb-2">{boutique.description || 'Aucune description'}</p>
+              <div className="p-2">
+                <h3 className="text-sm font-bold text-gray-900 mb-1 line-clamp-1">{boutique.nom}</h3>
+                <p className="text-xs text-gray-600 line-clamp-2 mb-1">{boutique.description || 'Aucune description'}</p>
                 
                 {/* Adresse */}
-                <div className="flex items-start mb-4">
-                  <svg className="h-3 w-3 text-gray-400 mt-0.5 mr-2 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="flex items-start mb-2">
+                  <svg className="h-2 w-2 text-gray-400 mt-0.5 mr-1 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
                   <p className="text-gray-500 text-xs line-clamp-2">{boutique.addresse}</p>
                 </div>
                 
-                <div className="flex flex-col gap-1">
+                <div className="flex flex-col gap-0.5">
                   <button
                     onClick={() => router.push(`/boutiques/${boutique.id}`)}
-                    className="w-full flex items-center justify-center px-2 py-1 text-xs bg-gradient-to-r from-[#0f7b6c] to-[#0a5c50] text-white rounded-md hover:shadow-md transition-all"
+                    className="w-full flex items-center justify-center px-1 py-0.5 text-xs bg-gradient-to-r from-[#0f7b6c] to-[#0a5c50] text-white rounded hover:shadow-md transition-all"
                   >
-                    <BuildingStorefrontIcon className="h-3 w-3 mr-1" />
+                    <BuildingStorefrontIcon className="h-2 w-2 mr-0.5" />
                     Gérer la boutique
                   </button>
                 </div>
                 {/* Actions rapides statut */}
-                <div className="pt-2 border-t border-gray-100">
-                  <div className="flex gap-1">
+                <div className="pt-1 border-t border-gray-100">
+                  <div className="flex gap-0.5">
                     {boutique.statut === 'EN_ATTENTE' && (
                       <>
                         <button
                           onClick={() => handleStatusChange(boutique.id, 'VALIDE')}
-                          className="flex-1 text-xs px-1.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 transition-colors font-medium"
+                          className="flex-1 text-xs px-1 py-0.5 bg-emerald-50 text-emerald-700 rounded hover:bg-emerald-100 transition-colors font-medium"
                         >
                           ✓ Valider
                         </button>
                         <button
                           onClick={() => handleStatusChange(boutique.id, 'REFUSE')}
-                          className="flex-1 text-xs px-1.5 py-1 bg-red-50 text-red-700 rounded-lg hover:bg-red-100 transition-colors font-medium"
+                          className="flex-1 text-xs px-1 py-0.5 bg-red-50 text-red-700 rounded hover:bg-red-100 transition-colors font-medium"
                         >
                           ✗ Refuser
                         </button>
@@ -395,7 +395,7 @@ export default function BoutiquesPage() {
                     {boutique.statut === 'VALIDE' && (
                       <button
                         onClick={() => handleStatusChange(boutique.id, 'SUSPENDU')}
-                        className="w-full text-xs px-1.5 py-1 bg-orange-50 text-orange-700 rounded-lg hover:bg-orange-100 transition-colors font-medium"
+                        className="w-full text-xs px-1 py-0.5 bg-orange-50 text-orange-700 rounded hover:bg-orange-100 transition-colors font-medium"
                       >
                         ⚠ Suspendre
                       </button>
@@ -403,7 +403,7 @@ export default function BoutiquesPage() {
                     {boutique.statut === 'SUSPENDU' && (
                       <button
                         onClick={() => handleStatusChange(boutique.id, 'VALIDE')}
-                        className="w-full text-xs px-1.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg hover:bg-emerald-100 transition-colors font-medium"
+                        className="w-full text-xs px-1 py-0.5 bg-emerald-50 text-emerald-700 rounded hover:bg-emerald-100 transition-colors font-medium"
                       >
                         ⟳ Réactiver
                       </button>
@@ -471,7 +471,7 @@ export default function BoutiquesPage() {
                 <div className="h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-md flex items-center justify-center overflow-hidden">
                   {selectedBoutique.logo ? (
                     <img
-                      src={`http://10.153.54.247:8080${selectedBoutique.logo}`}
+                      src={`http://192.168.43.97:8080${selectedBoutique.logo}`}
                       alt={selectedBoutique.nom}
                       className="w-full h-full object-cover"
                     />

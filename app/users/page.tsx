@@ -541,7 +541,7 @@ export default function UsersPage() {
                           {user.photoProfil ? (
                             <img
                               className="h-10 w-10 rounded-full object-cover"
-                              src={`http://10.154.66.76:8080${user.photoProfil}`}
+                              src={`http://192.168.43.97:8080${user.photoProfil}`}
                               alt={`${user.prenom} ${user.nom}`}
                             />
                           ) : (
@@ -894,11 +894,11 @@ export default function UsersPage() {
                     <button
                       onClick={() => {
                         setShowDetails(false)
-                        if (selectedUser.compte.statut === 'ACTIF') {
+                        if (selectedUser.compte?.statut === 'ACTIF') {
                           setConfirmAction({ type: 'deactivate', accountId: selectedUser.compte.id, action: 'désactiver' })
                           setShowStatusConfirm(true)
                         } else {
-                          setConfirmAction({ type: 'activate', accountId: selectedUser.compte.id, action: 'activer' })
+                          setConfirmAction({ type: 'activate', accountId: selectedUser.compte?.id, action: 'activer' })
                           setShowStatusConfirm(true)
                         }
                       }}
@@ -914,12 +914,12 @@ export default function UsersPage() {
                     <button
                       onClick={() => {
                         setShowDetails(false)
-                        if (!selectedUser.compte.isVerified) {
+                        if (selectedUser?.compte && !selectedUser.compte.isVerified) {
                           setConfirmAction({ type: 'verify', accountId: selectedUser.compte.id, action: 'vérifier' })
                           setShowVerifyConfirm(true)
                         }
                       }}
-                      disabled={selectedUser.compte.isVerified}
+                      disabled={selectedUser?.compte?.isVerified}
                       className={`px-4 py-2 rounded-lg transition-colors font-medium flex items-center justify-center ${
                         selectedUser.compte.isVerified
                           ? 'bg-gray-100 text-gray-400 cursor-not-allowed'

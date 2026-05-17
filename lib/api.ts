@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://10.153.54.247:8080" || 'http://10.154.66.76:8080'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://192.168.43.97:8080" || 'http://192.168.43.97:8080'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -185,6 +185,62 @@ export const productAPI = {
   
   searchProducts: (params: any) =>
     api.get('/api/produits/search/combined', { params }),
+}
+
+// Article Management APIs
+export const articleAPI = {
+  getArticles: () =>
+    api.get('/api/articles'),
+  
+  getArticlesByProduct: (productId: number) =>
+    api.get(`/api/articles/produit/${productId}`),
+  
+  getArticleBySku: (sku: string) =>
+    api.get(`/api/articles/sku/${sku}`),
+  
+  createArticle: (data: any) =>
+    api.post('/api/articles', data),
+  
+  createArticleWithImage: (formData: FormData) =>
+    api.post('/api/articles/with-image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+  
+  updateArticle: (id: number, data: any) =>
+    api.put(`/api/articles/${id}`, data),
+  
+  deleteArticle: (id: number) =>
+    api.delete(`/api/articles/${id}`),
+  
+  updateStock: (id: number, newStock: number) =>
+    api.put(`/api/articles/${id}/stock?newStock=${newStock}`),
+  
+  addStock: (id: number, quantity: number, motif: string) =>
+    api.put(`/api/articles/${id}/stock/add?quantity=${quantity}&motif=${motif}`),
+  
+  removeStock: (id: number, quantity: number, motif: string) =>
+    api.put(`/api/articles/${id}/stock/remove?quantity=${quantity}&motif=${motif}`),
+  
+  getOutOfStockArticles: () =>
+    api.get('/api/articles/out-of-stock'),
+  
+  getArticlesByPriceRange: (min: number, max: number) =>
+    api.get(`/api/articles/price-range?min=${min}&max=${max}`),
+  
+  searchArticles: (keyword: string) =>
+    api.get(`/api/articles/search?keyword=${keyword}`),
+  
+  getArticlesCountOutOfStock: () =>
+    api.get('/api/articles/count/out-of-stock'),
+  
+  getArticleMinPrice: (productId: number) =>
+    api.get(`/api/articles/price/min/${productId}`),
+  
+  getArticleMaxPrice: (productId: number) =>
+    api.get(`/api/articles/price/max/${productId}`),
+  
+  getArticleTotalStock: (productId: number) =>
+    api.get(`/api/articles/stock/total/${productId}`),
 }
 
 // Document Management APIs

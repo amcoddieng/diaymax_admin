@@ -83,6 +83,7 @@ export default function ProductsPage() {
   })
 
   const [imageFile, setImageFile] = useState<File | null>(null)
+  const [editImageFile, setEditImageFile] = useState<File | null>(null)
 
   useEffect(() => {
     fetchProducts()
@@ -204,15 +205,85 @@ export default function ProductsPage() {
     setImageFile(null)
   }
 
+  const openEditModal = (product: Product) => {
+    setSelectedProduct(product)
+    setProductForm({
+      nom: product.nom,
+      description: product.description,
+      prix: product.prix || 0,
+      statut: product.statut,
+      boutiqueId: product.boutique?.id || 0,
+      sousCategorieId: product.sousCategorie?.id || 0
+    })
+    setEditImageFile(null)
+    setShowEditModal(true)
+  }
+
+  const handleUpdateProduct = async () => {
+    try {
+      const formData = new FormData()
+      formData.append('nom', productForm.nom)
+      formData.append('description', productForm.description)
+      formData.append('prix', productForm.prix.toString())
+      formData.append('statut', productForm.statut)
+      formData.append('boutiqueId', productForm.boutiqueId.toString())
+      formData.append('sousCategorieId', productForm.sousCategorieId.toString())
+      
+      if (editImageFile) {
+        formData.append('image', editImageFile)
+      }
+
+      await productAPI.updateProduct(selectedProduct!.id, formData)
+      fetchProducts()
+      setShowEditModal(false)
+      setSelectedProduct(null)
+      resetForm()
+      setEditImageFile(null)
+    } catch (error) {
+      console.error('❌ Products Page - Error updating product:', error)
+    }
+  }
+
   const openCreateModal = () => {
     resetForm()
     setShowCreateModal(true)
   }
 
-  const filteredProducts = products.filter(product =>
-    product.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.description.toLowerCase().includes(searchTerm.toLowerCase())
-  )
+  const filteredProducts = products.filter(product => {
+    // Filtre par recherche (nom et description)
+    const searchMatch = !searchTerm || 
+      product.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      product.description.toLowerCase().includes(searchTerm.toLowerCase())
+    
+    // Récupérer les IDs depuis les objets imbriqués
+    const boutiqueId = product.boutique?.id
+    const sousCategorieId = product.sousCategorie?.id
+    
+    // Filtre par boutique
+    const boutiqueMatch = !filterBoutique || 
+      (boutiqueId && boutiqueId.toString() === filterBoutique)
+    
+    // Filtre par sous-catégorie
+    const subCategoryMatch = !filterSubCategory || 
+      (sousCategorieId && sousCategorieId.toString() === filterSubCategory)
+    
+    // Filtre par catégorie - utiliser la catégorie de la sous-catégorie
+    // Permettre le filtrage par catégorie même si "Toutes les boutiques" est sélectionné
+    const categoryMatch = !filterCategory || 
+      subCategories.find(sub => sub.id === sousCategorieId)?.categorieId.toString() === filterCategory
+    
+    console.log('📦 FILTRE PRODUITS - FONCTIONNALITÉ CATÉGORIE SANS BOUTIQUE:')
+    console.log('📦 Produit complet:', JSON.stringify(product, null, 2))
+    console.log('📦 searchTerm:', `"${searchTerm}"`, 'searchMatch:', searchMatch)
+    console.log('📦 filterBoutique:', `"${filterBoutique}"`, 'boutiqueMatch:', 'boutiqueId:', boutiqueId)
+    console.log('📦 filterCategory:', `"${filterCategory}"`, 'categoryMatch:', 'sousCategorieId:', sousCategorieId)
+    console.log('📦 filterSubCategory:', `"${filterSubCategory}"`, 'subCategoryMatch:', 'sousCategorieId:', sousCategorieId)
+    console.log('📦 Types des IDs:', typeof boutiqueId, typeof filterBoutique, typeof sousCategorieId, typeof filterSubCategory)
+    console.log('📦 Résultat final:', searchMatch && boutiqueMatch && subCategoryMatch && categoryMatch)
+    console.log('📦 ---')
+    
+    return searchMatch && boutiqueMatch && subCategoryMatch && categoryMatch
+  })
 
   const itemsPerPage = 12
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage)
@@ -237,37 +308,37 @@ export default function ProductsPage() {
         {/* Header */}
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Gestion des Produits</h1>
-            <p className="text-gray-600">Gérez tous les produits des boutiques</p>
+            <h1 className="text-lg font-bold text-gray-900">Gestion des Produits</h1>
+            <p className="text-xs text-gray-600">Gérez tous les produits des boutiques</p>
           </div>
           <button
             onClick={openCreateModal}
-            className="flex items-center px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors"
+            className="flex items-center px-2 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-700 transition-colors"
           >
-            <PlusIcon className="h-5 w-5 mr-2" />
+            <PlusIcon className="h-3 w-3 mr-1" />
             Ajouter un produit
           </button>
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-white p-4 rounded-lg shadow">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white p-2 rounded-lg shadow">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2">
             <div className="relative">
               <input
                 type="text"
-                placeholder="Rechercher un produit..."
+                placeholder="Rechercher..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
+                className="w-full pl-7 pr-2 py-1 text-xs border border-gray-300 rounded focus:ring-emerald-500 focus:border-emerald-500"
               />
-              <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+              <MagnifyingGlassIcon className="absolute left-2 top-1.5 h-3 w-3 text-gray-400" />
             </div>
             <select
               value={filterBoutique}
               onChange={(e) => setFilterBoutique(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
+              className="px-1.5 py-1 text-xs border border-gray-300 rounded focus:ring-emerald-500 focus:border-emerald-500"
             >
-              <option value="">Toutes les boutiques</option>
+              <option value="">Boutiques</option>
               {boutiques.map((boutique) => (
                 <option key={boutique.id} value={boutique.id}>
                   {boutique.nom}
@@ -280,9 +351,9 @@ export default function ProductsPage() {
                 setFilterCategory(e.target.value)
                 setFilterSubCategory('')
               }}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
+              className="px-1.5 py-1 text-xs border border-gray-300 rounded focus:ring-emerald-500 focus:border-emerald-500"
             >
-              <option value="">Toutes les catégories</option>
+              <option value="">Catégories</option>
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
                   {category.nom}
@@ -292,10 +363,10 @@ export default function ProductsPage() {
             <select
               value={filterSubCategory}
               onChange={(e) => setFilterSubCategory(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
+              className="px-1.5 py-1 text-xs border border-gray-300 rounded focus:ring-emerald-500 focus:border-emerald-500"
               disabled={!filterCategory}
             >
-              <option value="">Toutes les sous-catégories</option>
+              <option value="">Sous-catégories</option>
               {subCategories
                 .filter(sub => sub.categorieId === parseInt(filterCategory))
                 .map((subCategory) => (
@@ -305,10 +376,10 @@ export default function ProductsPage() {
                 ))}
             </select>
           </div>
-          <div className="mt-4">
+          <div className="mt-2">
             <button
               onClick={handleSearch}
-              className="px-4 py-2 bg-secondary-600 text-white rounded-md hover:bg-secondary-700 transition-colors"
+              className="px-2 py-1 text-xs bg-secondary-600 text-white rounded hover:bg-secondary-700 transition-colors"
             >
               Rechercher
             </button>
@@ -316,80 +387,87 @@ export default function ProductsPage() {
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
           {paginatedProducts.map((product) => (
-            <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-              <div className="h-48 bg-gray-200 relative">
+            <div key={product.id} className="bg-white rounded shadow overflow-hidden hover:shadow transition-shadow">
+              <div className="h-32 bg-gray-200 relative">
                 {product.image ? (
                   <img
-                    src={`http://10.154.66.76:8080${product.image}`}
+                    src={`http://192.168.43.97:8080${product.image}`}
                     alt={product.nom}
                     className="w-full h-full object-cover"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center">
-                    <PhotoIcon className="h-12 w-12 text-gray-400" />
+                    <PhotoIcon className="h-8 w-8 text-gray-400" />
                   </div>
                 )}
-                <div className="absolute top-2 right-2">
-                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(product.statut)}`}>
+                <div className="absolute top-1 right-1">
+                  <span className={`inline-flex px-1 py-0.5 text-xs font-semibold rounded-full ${getStatusColor(product.statut)}`}>
                     {product.statut}
                   </span>
                 </div>
               </div>
               
-              <div className="p-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-1 truncate">{product.nom}</h3>
-                <p className="text-sm text-gray-600 mb-2 line-clamp-2">{product.description}</p>
+              <div className="p-2">
+                <h3 className="text-sm font-semibold text-gray-900 mb-1 truncate">{product.nom}</h3>
+                <p className="text-xs text-gray-600 mb-1 line-clamp-2">{product.description}</p>
                 
-                <div className="space-y-2 mb-3">
+                <div className="space-y-1 mb-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">Boutique:</span>
-                    <span className="text-sm font-medium text-gray-900 truncate">
+                    <span className="text-xs text-gray-500">Boutique:</span>
+                    <span className="text-xs font-medium text-gray-900 truncate">
                       {product.boutique?.nom || 'N/A'}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">Catégorie:</span>
-                    <span className="text-sm font-medium text-gray-900 truncate">
+                    <span className="text-xs text-gray-500">Catégorie:</span>
+                    <span className="text-xs font-medium text-gray-900 truncate">
                       {product.sousCategorie?.nom || 'N/A'}
                     </span>
                   </div>
                   {product.prix && (
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-500">Prix:</span>
-                      <span className="text-sm font-bold text-emerald-600">
+                      <span className="text-xs text-gray-500">Prix:</span>
+                      <span className="text-xs font-bold text-emerald-600">
                         {formatCurrency(product.prix)}
                       </span>
                     </div>
                   )}
                 </div>
                 
-                <div className="flex flex-col space-y-2">
-                  <div className="flex space-x-2">
+                <div className="flex flex-col space-y-1">
+                  <div className="flex space-x-1">
                     <button
                       onClick={() => {
                         setSelectedProduct(product)
                         setShowDetails(true)
                       }}
-                      className="flex-1 flex items-center justify-center px-2 py-1 text-sm bg-emerald-100 text-emerald-700 rounded hover:bg-emerald-200"
+                      className="flex-1 flex items-center justify-center px-1 py-0.5 text-xs bg-emerald-100 text-emerald-700 rounded hover:bg-emerald-200"
                     >
-                      <EyeIcon className="h-4 w-4 mr-1" />
+                      <EyeIcon className="h-3 w-3 mr-0.5" />
                       Voir
                     </button>
                     <button
-                      onClick={() => handleDeleteProduct(product.id)}
-                      className="flex-1 flex items-center justify-center px-2 py-1 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200"
+                      onClick={() => openEditModal(product)}
+                      className="flex-1 flex items-center justify-center px-1 py-0.5 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
                     >
-                      <TrashIcon className="h-4 w-4 mr-1" />
+                      <PencilIcon className="h-3 w-3 mr-0.5" />
+                      Modifier
+                    </button>
+                    <button
+                      onClick={() => handleDeleteProduct(product.id)}
+                      className="flex-1 flex items-center justify-center px-1 py-0.5 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200"
+                    >
+                      <TrashIcon className="h-3 w-3 mr-0.5" />
                       Supprimer
                     </button>
                   </div>
                   <button
                     onClick={() => router.push(`/products/${product.id}/articles`)}
-                    className="w-full flex items-center justify-center px-2 py-1 text-sm bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                    className="w-full flex items-center justify-center px-1 py-0.5 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
                   >
-                    <CubeIcon className="h-4 w-4 mr-1" />
+                    <CubeIcon className="h-3 w-3 mr-0.5" />
                     Articles
                   </button>
                 </div>
@@ -460,7 +538,7 @@ export default function ProductsPage() {
                   <div className="h-48 bg-gray-200 rounded-lg flex items-center justify-center">
                     {selectedProduct.image ? (
                       <img
-                        src={`http://10.154.66.76:8080${selectedProduct.image}`}
+                        src={`http://192.168.43.97:8080${selectedProduct.image}`}
                         alt={selectedProduct.nom}
                         className="w-full h-full object-cover rounded-lg"
                       />
@@ -501,6 +579,135 @@ export default function ProductsPage() {
                     className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
                   >
                     Fermer
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Edit Product Modal */}
+        {showEditModal && selectedProduct && (
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+              <div className="mt-3">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Modifier le produit</h3>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+                    <input
+                      type="text"
+                      value={productForm.nom}
+                      onChange={(e) => setProductForm({...productForm, nom: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea
+                      value={productForm.description}
+                      onChange={(e) => setProductForm({...productForm, description: e.target.value})}
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Prix</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={productForm.prix}
+                      onChange={(e) => setProductForm({...productForm, prix: parseFloat(e.target.value)})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Boutique</label>
+                    <select
+                      value={productForm.boutiqueId}
+                      onChange={(e) => setProductForm({...productForm, boutiqueId: parseInt(e.target.value)})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                      required
+                    >
+                      <option value="">Sélectionner une boutique</option>
+                      {boutiques.map((boutique) => (
+                        <option key={boutique.id} value={boutique.id}>
+                          {boutique.nom}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Sous-catégorie</label>
+                    <select
+                      value={productForm.sousCategorieId}
+                      onChange={(e) => setProductForm({...productForm, sousCategorieId: parseInt(e.target.value)})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                      required
+                    >
+                      <option value="">Sélectionner une sous-catégorie</option>
+                      {subCategories.map((subCategory) => (
+                        <option key={subCategory.id} value={subCategory.id}>
+                          {subCategory.nom}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Statut</label>
+                    <select
+                      value={productForm.statut}
+                      onChange={(e) => setProductForm({...productForm, statut: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                    >
+                      <option value="ACTIF">Actif</option>
+                      <option value="INACTIF">Inactif</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Image actuelle</label>
+                    {selectedProduct.image ? (
+                      <img
+                        src={selectedProduct.image}
+                        alt={selectedProduct.nom}
+                        className="w-full h-32 object-cover rounded-md mb-2"
+                      />
+                    ) : (
+                      <div className="w-full h-32 bg-gray-200 rounded-md mb-2 flex items-center justify-center">
+                        <PhotoIcon className="h-8 w-8 text-gray-400" />
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Nouvelle image (optionnel)</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setEditImageFile(e.target.files?.[0] || null)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                    />
+                  </div>
+                </div>
+                <div className="mt-6 flex justify-end space-x-3">
+                  <button
+                    onClick={() => {
+                      setShowEditModal(false)
+                      setSelectedProduct(null)
+                      resetForm()
+                      setEditImageFile(null)
+                    }}
+                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    onClick={handleUpdateProduct}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  >
+                    Mettre à jour
                   </button>
                 </div>
               </div>

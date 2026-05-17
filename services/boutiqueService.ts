@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://10.153.54.247:8080"
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://192.168.43.97:8080"
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -87,6 +87,29 @@ export const boutiqueService = {
   
   getVendeurBoutique: () =>
     api.get('/api/boutiques/ma-boutique'),
+
+  // Documents APIs
+  getBoutiqueDocuments: (boutiqueId: number) =>
+    api.get(`/api/documents/boutique/${boutiqueId}`),
+  
+  createBoutiqueDocument: (boutiqueId: number, formData: FormData) =>
+    api.post(`/api/documents/boutique/${boutiqueId}/with-file`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+  
+  updateBoutiqueDocument: (documentId: number, data: any) =>
+    api.put(`/api/documents/${documentId}`, data),
+  
+  validateBoutiqueDocument: (documentId: number) =>
+    api.put(`/api/documents/${documentId}/validate`),
+  
+  deleteBoutiqueDocument: (documentId: number) =>
+    api.delete(`/api/documents/${documentId}`),
+  
+  updateBoutiqueDocumentFile: (documentId: number, formData: FormData) =>
+    api.post(`/api/documents/${documentId}/file`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }),
 }
 
 export default api
