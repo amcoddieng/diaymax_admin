@@ -9,10 +9,13 @@ export function middleware(request: NextRequest) {
     return NextResponse.next()
   }
 
+  if (request.nextUrl.pathname === '/' || request.nextUrl.pathname === '/dashbord') {
+    return NextResponse.redirect(new URL('/dashboard', request.url))
+  }
+
   // For now, allow access to all routes during development
   // The actual authentication will be handled client-side with localStorage
   if (process.env.NODE_ENV === 'development') {
-    // Only redirect from login to dashboard if there's a token in localStorage (handled client-side)
     return NextResponse.next()
   }
 
