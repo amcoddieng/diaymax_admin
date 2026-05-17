@@ -277,7 +277,7 @@ export default function LoginPage() {
 
           {process.env.NEXT_PUBLIC_DEBUG === 'true' && (
             <p className="mt-1 text-[11px] text-gray-400">
-              API : {process.env.NEXT_PUBLIC_API_URL || "http://192.168.43.97:8080"}
+              API : {process.env.NEXT_PUBLIC_API_URL || "https://c3c9-102-164-160-251.ngrok-free.app"}
             </p>
           )}
         </div>

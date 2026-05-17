@@ -393,7 +393,7 @@ export default function ProductsPage() {
               <div className="h-32 bg-gray-200 relative">
                 {product.image ? (
                   <img
-                    src={`http://192.168.43.97:8080${product.image}`}
+                    src={`https://c3c9-102-164-160-251.ngrok-free.app${product.image}`}
                     alt={product.nom}
                     className="w-full h-full object-cover"
                   />
@@ -538,7 +538,7 @@ export default function ProductsPage() {
                   <div className="h-48 bg-gray-200 rounded-lg flex items-center justify-center">
                     {selectedProduct.image ? (
                       <img
-                        src={`http://192.168.43.97:8080${selectedProduct.image}`}
+                        src={`https://c3c9-102-164-160-251.ngrok-free.app${selectedProduct.image}`}
                         alt={selectedProduct.nom}
                         className="w-full h-full object-cover rounded-lg"
                       />

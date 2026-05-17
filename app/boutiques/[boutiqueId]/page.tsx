@@ -600,7 +600,7 @@ export default function BoutiqueDetailPage({ params }: { params: Promise<{ bouti
               <div className="flex-shrink-0">
                 {boutique.logo ? (
                   <img
-                    src={`http://192.168.43.97:8080${boutique.logo}`}
+                    src={`https://c3c9-102-164-160-251.ngrok-free.app${boutique.logo}`}
                     alt={boutique.nom}
                     className="h-20 w-20 object-cover rounded-lg shadow-md"
                   />
@@ -790,7 +790,7 @@ export default function BoutiqueDetailPage({ params }: { params: Promise<{ bouti
                             <div className="flex items-center">
                               <div className="relative">
                                 {product.image ? (
-                                  <img src={`http://192.168.43.97:8080${product.image}`} alt={product.nom} className="h-8 w-8 object-cover rounded-md" />
+                                  <img src={`https://c3c9-102-164-160-251.ngrok-free.app${product.image}`} alt={product.nom} className="h-8 w-8 object-cover rounded-md" />
                                 ) : (
                                   <div className="h-8 w-8 bg-gray-200 rounded-md flex items-center justify-center">
                                     <PhotoIcon className="h-4 w-4 text-gray-400" />
@@ -904,7 +904,7 @@ export default function BoutiqueDetailPage({ params }: { params: Promise<{ bouti
                       <div key={product.id} className="group bg-white rounded-lg border border-gray-100 overflow-hidden hover:shadow-md transition-all hover:-translate-y-1">
                         <div className="relative h-32 bg-gradient-to-br from-gray-100 to-gray-200 overflow-hidden">
                           {product.image ? (
-                            <img src={`http://192.168.43.97:8080${product.image}`} alt={product.nom} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                            <img src={`https://c3c9-102-164-160-251.ngrok-free.app${product.image}`} alt={product.nom} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                           ) : (
                             <div className="w-full h-full flex flex-col items-center justify-center">
                               <PhotoIcon className="h-6 w-6 text-gray-400" />
@@ -1024,7 +1024,7 @@ export default function BoutiqueDetailPage({ params }: { params: Promise<{ bouti
                               <td className="px-3 py-2 whitespace-nowrap">
                                 <div className="flex items-center">
                                   {article.image ? (
-                                    <img src={`http://192.168.43.97:8080${article.image}`} alt={article.sku} className="h-8 w-8 object-cover rounded-lg mr-2" />
+                                    <img src={`https://c3c9-102-164-160-251.ngrok-free.app${article.image}`} alt={article.sku} className="h-8 w-8 object-cover rounded-lg mr-2" />
                                   ) : (
                                     <div className="h-8 w-8 bg-gray-100 rounded-lg flex items-center justify-center mr-2">
                                       <PhotoIcon className="h-4 w-4 text-gray-400" />
@@ -1169,7 +1169,7 @@ export default function BoutiqueDetailPage({ params }: { params: Promise<{ bouti
                                     >
                                       {document.url ? (
                                         <img
-                                          src={`http://192.168.43.97:8080${document.url}`}
+                                          src={`https://c3c9-102-164-160-251.ngrok-free.app${document.url}`}
                                           alt={document.nom}
                                           className="h-full w-full object-cover"
                                         />
@@ -1486,7 +1486,7 @@ export default function BoutiqueDetailPage({ params }: { params: Promise<{ bouti
             <div className="p-4 flex items-center justify-center">
               {previewDocument.url ? (
                 <img
-                  src={`http://192.168.43.97:8080${previewDocument.url}`}
+                  src={`https://c3c9-102-164-160-251.ngrok-free.app${previewDocument.url}`}
                   alt={previewDocument.nom}
                   className="max-h-[80vh] w-full object-contain"
                 />

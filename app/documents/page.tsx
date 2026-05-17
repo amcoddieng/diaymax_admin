@@ -278,7 +278,7 @@ export default function DocumentsPage() {
               <div className="h-48 bg-gray-100 relative">
                 {document.url ? (
                   <img
-                    src={`http://192.168.43.97:8080${document.url}`}
+                    src={`https://c3c9-102-164-160-251.ngrok-free.app${document.url}`}
                     alt={`Document ${document.type}`}
                     className="w-full h-full object-cover"
                   />
@@ -429,7 +429,7 @@ export default function DocumentsPage() {
                 <div className="border rounded-lg overflow-hidden">
                   {selectedDocument.url ? (
                     <img
-                      src={`http://http://192.168.43.97:8080${selectedDocument.url}`}
+                      src={`http://https://c3c9-102-164-160-251.ngrok-free.app${selectedDocument.url}`}
                       alt={`Document ${selectedDocument.type}`}
                       className="w-full h-auto max-h-96 object-contain"
                     />
