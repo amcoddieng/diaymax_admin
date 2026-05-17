@@ -49,7 +49,19 @@ export const documentService = {
   getDocumentsByValidation: (validated: boolean) =>
     api.get(`/api/documents/validated/${validated}`),
   
+  // Create a document with a file upload
   createDocument: (personneId: number, type: string, file: File) => {
+    const formData = new FormData()
+    formData.append('personneId', personneId.toString())
+    formData.append('type', type)
+    formData.append('file', file)
+    
+    return api.post('/api/documents/with-file', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+  },
+  
+  createDocumentWithFile: (personneId: number, type: string, file: File) => {
     const formData = new FormData()
     formData.append('personneId', personneId.toString())
     formData.append('type', type)

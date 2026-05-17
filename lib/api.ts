@@ -251,7 +251,13 @@ export const documentAPI = {
   getDocumentsByPerson: (personId: number) =>
     api.get(`/api/documents/personne/${personId}`),
   
+  // Create a document with a file upload
   createDocument: (formData: FormData) =>
+    api.post('/api/documents/with-file', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    }),
+  
+  createDocumentWithFile: (formData: FormData) =>
     api.post('/api/documents/with-file', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     }),

@@ -51,24 +51,27 @@ export const cartService = {
     api.delete(`/api/paniers/${cartId}`),
   
   // Cart Items Management
-  addItemToCart: (cartId: number, articleId: number, quantite: number) =>
-    api.post(`/api/paniers/${cartId}/items`, { articleId, quantite }),
+  addItemToCart: (clientId: number, articleId: number, quantite: number, prixUnitaire: number) =>
+    api.post(`/api/paniers/client/${clientId}/ajouter`, { articleId, quantite, prixUnitaire }),
   
   getCartItems: (cartId: number) =>
-    api.get(`/api/paniers/${cartId}/items`),
+    api.get(`/api/paniers/${cartId}`),
   
-  updateCartItem: (itemId: number, quantite: number) =>
-    api.put(`/api/paniers/items/${itemId}`, { quantite }),
+  updateCartItem: (cartId: number, articleId: number, quantite: number) =>
+    api.put(`/api/paniers/${cartId}/article/${articleId}/quantite?quantite=${quantite}`),
   
-  deleteCartItem: (itemId: number) =>
-    api.delete(`/api/paniers/items/${itemId}`),
+  deleteCartItem: (cartId: number, articleId: number) =>
+    api.delete(`/api/paniers/${cartId}/article/${articleId}`),
   
   // Special Actions
   validateCart: (cartId: number) =>
-    api.put(`/api/paniers/${cartId}/valider`),
+    api.post(`/api/paniers/${cartId}/valider`),
   
   getCartsByClient: (clientId: number) =>
     api.get(`/api/paniers/client/${clientId}`),
+
+  getAllCarts: () =>
+    api.get('/api/paniers'),
   
   // Additional utility methods based on API documentation
   getActiveCartByClient: (clientId: number) =>
@@ -76,9 +79,6 @@ export const cartService = {
   
   clearCart: (cartId: number) =>
     api.delete(`/api/paniers/${cartId}/vider`),
-  
-  updateItemQuantity: (cartId: number, articleId: number, quantite: number) =>
-    api.put(`/api/paniers/${cartId}/article/${articleId}/quantite?quantite=${quantite}`),
   
   removeItemFromCart: (cartId: number, articleId: number) =>
     api.delete(`/api/paniers/${cartId}/article/${articleId}`),

@@ -23,19 +23,21 @@ import { userService } from '@/services/userService'
 
 interface CartItem {
   id: number
-  article: {
-    id: number
-    nom: string
-    prix: number
-  }
+  panierId?: number
+  articleId: number
   quantite: number
   prixUnitaire: number
   sousTotal: number
+  date?: string
+  articleSku?: string
+  articleNom: string
+  articleImage?: string
 }
 
 interface Cart {
   id: number
-  client: {
+  clientId?: number
+  client?: {
     id: number
     nom: string
     prenom: string
@@ -68,28 +70,36 @@ export default function CartsPage() {
   const [clientFilter, setClientFilter] = useState('')
   const [selectedCart, setSelectedCart] = useState<Cart | null>(null)
   const [showDetails, setShowDetails] = useState(false)
-  const [showCreateModal, setShowCreateModal] = useState(false)
   const [showAddItemModal, setShowAddItemModal] = useState(false)
   const [showValidateModal, setShowValidateModal] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage] = useState(10)
-  const [cartForm, setCartForm] = useState({ clientId: 0 })
-  const [itemForm, setItemForm] = useState({ articleId: 0, quantite: 1 })
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
+  const [itemForm, setItemForm] = useState({ articleId: 0, quantite: 1, prixUnitaire: 0 })
 
   useEffect(() => {
     fetchCarts()
     fetchUsers()
   }, [])
 
-  const fetchCarts = async () => {
+  const fetchCarts = async (clientId?: number) => {
     try {
+      setLoading(true)
       console.log('🛒 Carts Page - Fetching carts...')
-      
-      // According to the API documentation, there's no endpoint to get all carts
-      // We need to fetch carts by client or use a different approach
-      // For now, let's start with an empty array and let users search by client
-      setCarts([])
-      console.log('✅ Carts Page - Carts initialized (use search to find carts)')
+      let response
+
+      if (clientId) {
+        console.log(`🛒 Carts Page - Fetching carts for client ${clientId}...`)
+        response = await cartService.getCartsByClient(clientId)
+      } else {
+        console.log('🛒 Carts Page - Fetching all carts...')
+        response = await cartService.getAllCarts()
+      }
+
+      const cartData = response?.data || []
+      setCarts(Array.isArray(cartData) ? cartData : [])
+      console.log('✅ Carts Page - Carts loaded:', Array.isArray(cartData) ? cartData.length : 0)
     } catch (error) {
       console.error('❌ Carts Page - Error fetching carts:', error)
       setCarts([])
@@ -112,65 +122,50 @@ export default function CartsPage() {
   const handleSearch = async () => {
     try {
       console.log('🔍 Carts Page - Searching carts...')
-      
-      if (clientFilter) {
-        console.log(`🛒 Carts Page - Fetching carts for client ${clientFilter}...`)
-        const response = await cartService.getCartsByClient(parseInt(clientFilter))
-        const cartData = response?.data || []
-        setCarts(Array.isArray(cartData) ? cartData : [])
-        console.log('✅ Carts Page - Carts found:', cartData.length)
-      } else {
-        console.log('⚠️ Carts Page - Please select a client to search carts')
-        setCarts([])
-      }
+      await fetchCarts(clientFilter ? parseInt(clientFilter) : undefined)
     } catch (error) {
       console.error('❌ Carts Page - Error searching carts:', error)
-      setCarts([])
-    }
-  }
-
-  const handleCreateCart = async () => {
-    try {
-      await cartService.createCart(cartForm.clientId)
-      fetchCarts()
-      setShowCreateModal(false)
-      setCartForm({ clientId: 0 })
-    } catch (error) {
-      console.error('❌ Carts Page - Error creating cart:', error)
     }
   }
 
   const handleAddItem = async () => {
-    if (!selectedCart || !itemForm.articleId) return
+    if (!selectedCart || !itemForm.articleId || !itemForm.prixUnitaire) return
     
     try {
-      await cartService.addItemToCart(selectedCart.id, itemForm.articleId, itemForm.quantite)
+      const clientId = selectedCart.client?.id || selectedCart.clientId
+      if (!clientId) {
+        throw new Error('Client introuvable pour ce panier')
+      }
+
+      await cartService.addItemToCart(clientId, itemForm.articleId, itemForm.quantite, itemForm.prixUnitaire)
       fetchCarts()
       setShowAddItemModal(false)
-      setItemForm({ articleId: 0, quantite: 1 })
+      setItemForm({ articleId: 0, quantite: 1, prixUnitaire: 0 })
     } catch (error) {
       console.error('❌ Carts Page - Error adding item:', error)
     }
   }
 
-  const handleUpdateItemQuantity = async (itemId: number, newQuantity: number) => {
+  const handleUpdateItemQuantity = async (item: CartItem, newQuantity: number) => {
     if (!selectedCart) return
     
     try {
-      await cartService.updateCartItem(itemId, newQuantity)
+      await cartService.updateCartItem(selectedCart.id, item.articleId, newQuantity)
       fetchCarts()
+      setSelectedCart(null)
     } catch (error) {
       console.error('❌ Carts Page - Error updating item quantity:', error)
     }
   }
 
-  const handleRemoveItem = async (itemId: number) => {
+  const handleRemoveItem = async (item: CartItem) => {
     if (!selectedCart) return
     
     if (confirm('Êtes-vous sûr de vouloir supprimer cet article du panier ?')) {
       try {
-        await cartService.deleteCartItem(itemId)
+        await cartService.deleteCartItem(selectedCart.id, item.articleId)
         fetchCarts()
+        setSelectedCart(null)
       } catch (error) {
         console.error('❌ Carts Page - Error removing item:', error)
       }
@@ -204,7 +199,7 @@ export default function CartsPage() {
   const handleViewDetails = async (cart: Cart) => {
     try {
       const response = await cartService.getCartItems(cart.id)
-      const cartWithItems = { ...cart, items: response?.data || [] }
+      const cartWithItems = { ...cart, ...response?.data }
       setSelectedCart(cartWithItems)
       setShowDetails(true)
     } catch (error) {
@@ -240,11 +235,25 @@ export default function CartsPage() {
     })
   }
 
-  const filteredCarts = carts.filter(cart =>
-    cart.client?.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cart.client?.prenom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cart.id.toString().includes(searchTerm)
-  )
+  const filteredCarts = carts.filter((cart) => {
+    const searchMatch =
+      cart.client?.nom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cart.client?.prenom?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cart.id.toString().includes(searchTerm)
+
+    const statusMatch = statusFilter ? cart.status === statusFilter : true
+    const clientMatch = clientFilter ? String(cart.client?.id) === clientFilter : true
+
+    let dateMatch = true
+    if (dateFrom) {
+      dateMatch = dateMatch && new Date(cart.date) >= new Date(dateFrom)
+    }
+    if (dateTo) {
+      dateMatch = dateMatch && new Date(cart.date) <= new Date(dateTo)
+    }
+
+    return searchMatch && statusMatch && clientMatch && dateMatch
+  })
 
   const totalPages = Math.ceil(filteredCarts.length / itemsPerPage)
   const paginatedCarts = filteredCarts.slice(
@@ -269,15 +278,8 @@ export default function CartsPage() {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">Gestion des Paniers</h1>
-            <p className="text-gray-600">Gérez tous les paniers des clients</p>
+            <p className="text-gray-600">Consultez et modifiez les paniers existants</p>
           </div>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors"
-          >
-            <PlusIcon className="h-5 w-5 mr-2" />
-            Nouveau Panier
-          </button>
         </div>
 
         {/* Instructions */}
@@ -290,10 +292,9 @@ export default function CartsPage() {
               <h3 className="text-sm font-medium text-blue-800">Comment utiliser cette page</h3>
               <div className="mt-2 text-sm text-blue-700">
                 <ul className="list-disc list-inside space-y-1">
-                  <li>Sélectionnez un client dans le filtre pour voir ses paniers</li>
-                  <li>Créez un nouveau panier pour un client spécifique</li>
-                  <li>Ajoutez des articles aux paniers existants</li>
-                  <li>Validez les paniers pour les transformer en commandes</li>
+                  <li>Filtrez les paniers par client, statut ou plage de dates</li>
+                  <li>Ouvrez un panier pour voir les détails et modifier son contenu</li>
+                  <li>Validez ou supprimez uniquement des paniers existants</li>
                 </ul>
               </div>
             </div>
@@ -302,7 +303,7 @@ export default function CartsPage() {
 
         {/* Search and Filters */}
         <div className="bg-white p-4 rounded-lg shadow">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
             <div className="relative">
               <MagnifyingGlassIcon className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
               <input
@@ -337,9 +338,27 @@ export default function CartsPage() {
                 </option>
               ))}
             </select>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Date début</label>
+              <input
+                type="date"
+                value={dateFrom}
+                onChange={(e) => setDateFrom(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Date fin</label>
+              <input
+                type="date"
+                value={dateTo}
+                onChange={(e) => setDateTo(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
+              />
+            </div>
             <button
               onClick={handleSearch}
-              className="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors flex items-center"
+              className="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors flex items-center justify-center"
             >
               <FunnelIcon className="h-5 w-5 mr-2" />
               Filtrer
@@ -501,51 +520,6 @@ export default function CartsPage() {
           </div>
         </div>
 
-        {/* Create Cart Modal */}
-        {showCreateModal && (
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-            <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-              <div className="mt-3">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Créer un nouveau panier</h3>
-                
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Client</label>
-                    <select
-                      value={cartForm.clientId}
-                      onChange={(e) => setCartForm({...cartForm, clientId: parseInt(e.target.value)})}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
-                      required
-                    >
-                      <option value="">Sélectionner un client</option>
-                      {users.map((user) => (
-                        <option key={user.id} value={user.id}>
-                          {user.prenom} {user.nom} - {user.email}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="mt-6 flex justify-end space-x-3">
-                  <button
-                    onClick={() => setShowCreateModal(false)}
-                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-                  >
-                    Annuler
-                  </button>
-                  <button
-                    onClick={handleCreateCart}
-                    className="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700"
-                  >
-                    Créer
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Cart Details Modal */}
         {showDetails && selectedCart && (
           <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
@@ -601,7 +575,7 @@ export default function CartsPage() {
                       {selectedCart.items?.map((item) => (
                         <div key={item.id} className="flex justify-between items-center p-2 bg-gray-50 rounded">
                           <div className="flex-1">
-                            <p className="font-medium">{item.article.nom}</p>
+                            <p className="font-medium">{item.articleNom}</p>
                             <p className="text-sm text-gray-500">
                               {formatCurrency(item.prixUnitaire)} × {item.quantite}
                             </p>
@@ -609,14 +583,14 @@ export default function CartsPage() {
                           <div className="flex items-center space-x-2">
                             <div className="flex items-center space-x-1">
                               <button
-                                onClick={() => handleUpdateItemQuantity(item.id, Math.max(1, item.quantite - 1))}
+                                onClick={() => handleUpdateItemQuantity(item, Math.max(1, item.quantite - 1))}
                                 className="text-gray-500 hover:text-gray-700"
                               >
                                 -
                               </button>
                               <span className="text-sm font-medium w-8 text-center">{item.quantite}</span>
                               <button
-                                onClick={() => handleUpdateItemQuantity(item.id, item.quantite + 1)}
+                                onClick={() => handleUpdateItemQuantity(item, item.quantite + 1)}
                                 className="text-gray-500 hover:text-gray-700"
                               >
                                 +
@@ -624,7 +598,7 @@ export default function CartsPage() {
                             </div>
                             <p className="font-bold">{formatCurrency(item.sousTotal)}</p>
                             <button
-                              onClick={() => handleRemoveItem(item.id)}
+                              onClick={() => handleRemoveItem(item)}
                               className="text-red-600 hover:text-red-900"
                             >
                               <TrashIcon className="h-4 w-4" />
@@ -697,6 +671,18 @@ export default function CartsPage() {
                       onChange={(e) => setItemForm({...itemForm, quantite: parseInt(e.target.value)})}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
                       min="1"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Prix unitaire</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={itemForm.prixUnitaire}
+                      onChange={(e) => setItemForm({...itemForm, prixUnitaire: parseFloat(e.target.value)})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
+                      min="0"
                       required
                     />
                   </div>

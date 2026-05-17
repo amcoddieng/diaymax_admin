@@ -126,14 +126,14 @@ export default function BoutiqueDetailPage({ params }: { params: Promise<{ bouti
   const [documents, setDocuments] = useState<any[]>([])
   const [documentsLoading, setDocumentsLoading] = useState(false)
   const [showAddDocumentModal, setShowAddDocumentModal] = useState(false)
-  const [showEditDocumentModal, setShowEditDocumentModal] = useState(false)
-  const [selectedDocument, setSelectedDocument] = useState<any>(null)
   const [documentFile, setDocumentFile] = useState<File | null>(null)
+  const [showDocumentPreview, setShowDocumentPreview] = useState(false)
+  const [previewDocument, setPreviewDocument] = useState<any>(null)
   
-  const [documentForm, setDocumentForm] = useState({
-    nom: '',
-    type: '',
-    description: ''
+  // documentForm removed: documents are not editable from UI
+
+  const [newDocumentForm, setNewDocumentForm] = useState({
+    type: 'CARTE_IDENTITE' as const
   })
   
   const [editForm, setEditForm] = useState({
@@ -292,20 +292,23 @@ export default function BoutiqueDetailPage({ params }: { params: Promise<{ bouti
 
   const handleCreateDocument = async () => {
     try {
-      if (!documentFile) {
-        alert('Veuillez sélectionner un fichier')
+      const personneId = boutique?.vendeur?.id || (boutique as any)?.personneId || (boutique as any)?.personne?.id || (boutique as any)?.vendeurId
+      if (!documentFile || !personneId) {
+        alert('Personne introuvable ou aucun fichier sélectionné')
         return
       }
 
-      await documentService.createDocument(
-        boutiqueId,
-        documentForm.type,
+      await documentService.createDocumentWithFile(
+        personneId,
+        newDocumentForm.type,
         documentFile
       )
       
       fetchDocuments()
       setShowAddDocumentModal(false)
-      setDocumentForm({ nom: '', type: '', description: '' })
+      setNewDocumentForm({
+        type: 'CARTE_IDENTITE'
+      })
       setDocumentFile(null)
     } catch (error) {
       console.error('❌ Error creating document:', error)
@@ -313,33 +316,7 @@ export default function BoutiqueDetailPage({ params }: { params: Promise<{ bouti
     }
   }
 
-  const handleUpdateDocument = async () => {
-    if (!selectedDocument) return
-
-    try {
-      const documentData = {
-        nom: documentForm.nom,
-        type: documentForm.type,
-        description: documentForm.description
-      }
-
-      await documentService.updateDocument(selectedDocument.id, documentData)
-      
-      // Si un nouveau fichier est sélectionné, mettre à jour le fichier
-      if (documentFile) {
-        await documentService.updateDocumentFile(selectedDocument.id, documentFile)
-      }
-      
-      fetchDocuments()
-      setShowEditDocumentModal(false)
-      setSelectedDocument(null)
-      setDocumentForm({ nom: '', type: '', description: '' })
-      setDocumentFile(null)
-    } catch (error) {
-      console.error('❌ Error updating document:', error)
-      alert(`Erreur: ${error instanceof Error ? error.message : 'Erreur inconnue'}`)
-    }
-  }
+  // Editing disabled: handleUpdateDocument removed
 
   const handleValidateDocument = async (documentId: number) => {
     try {
@@ -363,15 +340,7 @@ export default function BoutiqueDetailPage({ params }: { params: Promise<{ bouti
     }
   }
 
-  const openEditDocumentModal = (document: any) => {
-    setSelectedDocument(document)
-    setDocumentForm({
-      nom: document.nom,
-      type: document.type,
-      description: document.description
-    })
-    setShowEditDocumentModal(true)
-  }
+  // openEditDocumentModal removed — editing disabled
 
   const calculateStats = () => {
     const totalProducts = products.length
@@ -1157,10 +1126,13 @@ export default function BoutiqueDetailPage({ params }: { params: Promise<{ bouti
                   </button>
                 </div>
 
-                {documents.filter(doc => 
-                  doc.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                  doc.type.toLowerCase().includes(searchTerm.toLowerCase())
-                ).length > 0 ? (
+                {documents.filter((doc) => {
+                  const term = searchTerm.toLowerCase()
+                  return (
+                    String(doc.nom ?? '').toLowerCase().includes(term) ||
+                    String(doc.type ?? '').toLowerCase().includes(term)
+                  )
+                }).length > 0 ? (
                   <div className="bg-white rounded-lg border border-gray-100 overflow-hidden">
                     <div className="overflow-x-auto">
                       <table className="w-full">
@@ -1176,19 +1148,38 @@ export default function BoutiqueDetailPage({ params }: { params: Promise<{ bouti
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-100">
                           {documents
-                            .filter(doc => 
-                              doc.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                              doc.type.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                              doc.description.toLowerCase().includes(searchTerm.toLowerCase())
-                            )
+                            .filter((doc) => {
+                              const term = searchTerm.toLowerCase()
+                              return (
+                                String(doc.nom ?? '').toLowerCase().includes(term) ||
+                                String(doc.type ?? '').toLowerCase().includes(term) ||
+                                String(doc.description ?? '').toLowerCase().includes(term)
+                              )
+                            })
                             .map((document) => (
                               <tr key={document.id} className="hover:bg-gray-50 transition-colors">
                                 <td className="px-3 py-2">
                                   <div className="flex items-center">
-                                    <div className="h-7 w-7 bg-[#0f7b6c]/10 rounded-lg flex items-center justify-center mr-2">
-                                      <svg className="h-3 w-3 text-[#0f7b6c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                      </svg>
+                                    <div
+                                      className="h-9 w-9 rounded-lg overflow-hidden mr-2 border border-gray-200 cursor-pointer hover:ring-2 hover:ring-[#0f7b6c]/40"
+                                      onClick={() => {
+                                        setPreviewDocument(document)
+                                        setShowDocumentPreview(true)
+                                      }}
+                                    >
+                                      {document.url ? (
+                                        <img
+                                          src={`http://192.168.43.97:8080${document.url}`}
+                                          alt={document.nom}
+                                          className="h-full w-full object-cover"
+                                        />
+                                      ) : (
+                                        <div className="h-full w-full bg-[#0f7b6c]/10 flex items-center justify-center">
+                                          <svg className="h-3 w-3 text-[#0f7b6c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                          </svg>
+                                        </div>
+                                      )}
                                     </div>
                                     <div>
                                       <p className="text-sm font-medium text-gray-900">{document.nom}</p>
@@ -1218,13 +1209,6 @@ export default function BoutiqueDetailPage({ params }: { params: Promise<{ bouti
                                  </td>
                                 <td className="px-3 py-2">
                                   <div className="flex items-center justify-end space-x-1">
-                                    <button
-                                      onClick={() => openEditDocumentModal(document)}
-                                      className="p-1 text-blue-600 hover:bg-blue-50 rounded transition-colors"
-                                      title="Modifier"
-                                    >
-                                      <PencilIcon className="h-3 w-3" />
-                                    </button>
                                     {!document.validated && (
                                       <button
                                         onClick={() => handleValidateDocument(document.id)}
@@ -1441,16 +1425,39 @@ export default function BoutiqueDetailPage({ params }: { params: Promise<{ bouti
                 <button onClick={() => setShowAddDocumentModal(false)} className="p-1 hover:bg-gray-100 rounded-lg"><XMarkIcon className="h-5 w-5" /></button>
               </div>
               <div className="space-y-4">
-                <input type="text" placeholder="Nom" value={documentForm.nom} onChange={(e) => setDocumentForm({...documentForm, nom: e.target.value})} className="w-full px-4 py-2 border rounded-xl" />
-                <select value={documentForm.type} onChange={(e) => setDocumentForm({...documentForm, type: e.target.value})} className="w-full px-4 py-2 border rounded-xl">
-                  <option value="">Type de document</option>
-                  <option value={documentService.DOCUMENT_TYPES.CARTE_IDENTITE}>Carte d'identité</option>
-                  <option value={documentService.DOCUMENT_TYPES.NINEA}>NINEA</option>
-                  <option value={documentService.DOCUMENT_TYPES.PASSPORT}>Passport</option>
-                  <option value={documentService.DOCUMENT_TYPES.RCCM}>RCCM</option>
-                </select>
-                <textarea placeholder="Description" value={documentForm.description} onChange={(e) => setDocumentForm({...documentForm, description: e.target.value})} rows={3} className="w-full px-4 py-2 border rounded-xl" />
-                <input type="file" onChange={(e) => setDocumentFile(e.target.files?.[0] || null)} className="w-full px-4 py-2 border rounded-xl" />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Type de document</label>
+                  <select
+                    value={newDocumentForm.type}
+                    onChange={(e) => setNewDocumentForm({...newDocumentForm, type: e.target.value as any})}
+                    className="w-full px-4 py-2 border rounded-xl"
+                  >
+                    <option value="CARTE_IDENTITE">Carte d'identité</option>
+                    <option value="NINEA">NINEA</option>
+                    <option value="PASSPORT">Passport</option>
+                    <option value="RCCM">RCCM</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Fichier</label>
+                  <input
+                    type="file"
+                    onChange={(e) => setDocumentFile(e.target.files?.[0] || null)}
+                    className="w-full px-4 py-2 border rounded-xl"
+                  />
+                  {documentFile && (
+                    <div className="mt-3">
+                      <p className="text-sm text-gray-500">{documentFile.name}</p>
+                      {documentFile.type.startsWith('image') && (
+                        <img
+                          src={URL.createObjectURL(documentFile)}
+                          alt="Aperçu du document"
+                          className="mt-2 max-h-48 w-full object-contain rounded-xl border border-gray-200"
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
               <div className="flex gap-3 mt-6">
                 <button onClick={() => setShowAddDocumentModal(false)} className="flex-1 px-4 py-2 bg-gray-100 rounded-xl">Annuler</button>
@@ -1461,73 +1468,31 @@ export default function BoutiqueDetailPage({ params }: { params: Promise<{ bouti
         </div>
       )}
 
-      {/* Edit Document Modal */}
-      {showEditDocumentModal && selectedDocument && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full">
-            <div className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-bold text-gray-900">Modifier le document</h3>
-                <button onClick={() => setShowEditDocumentModal(false)} className="p-1 hover:bg-gray-100 rounded-lg">
-                  <XMarkIcon className="h-5 w-5" />
-                </button>
+      {/* Editing removed: edit modal intentionally omitted */}
+
+      {/* Document Preview Modal */}
+      {showDocumentPreview && previewDocument && (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl max-w-3xl w-full max-h-[90vh] overflow-auto">
+            <div className="sticky top-0 p-4 flex justify-between items-center border-b border-gray-100">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">{previewDocument.nom || 'Aperçu du document'}</h3>
+                <p className="text-xs text-gray-500">Type: {previewDocument.type}</p>
               </div>
-              <div className="space-y-4">
-                <input 
-                  type="text" 
-                  placeholder="Nom" 
-                  value={documentForm.nom} 
-                  onChange={(e) => setDocumentForm({...documentForm, nom: e.target.value})} 
-                  className="w-full px-4 py-2 border rounded-xl" 
+              <button onClick={() => { setShowDocumentPreview(false); setPreviewDocument(null); }} className="p-1 hover:bg-gray-100 rounded-lg">
+                <XMarkIcon className="h-5 w-5 text-gray-600" />
+              </button>
+            </div>
+            <div className="p-4 flex items-center justify-center">
+              {previewDocument.url ? (
+                <img
+                  src={`http://192.168.43.97:8080${previewDocument.url}`}
+                  alt={previewDocument.nom}
+                  className="max-h-[80vh] w-full object-contain"
                 />
-                <select 
-                  value={documentForm.type} 
-                  onChange={(e) => setDocumentForm({...documentForm, type: e.target.value})} 
-                  className="w-full px-4 py-2 border rounded-xl"
-                >
-                  <option value="">Type de document</option>
-                  <option value={documentService.DOCUMENT_TYPES.CARTE_IDENTITE}>Carte d'identité</option>
-                  <option value={documentService.DOCUMENT_TYPES.NINEA}>NINEA</option>
-                  <option value={documentService.DOCUMENT_TYPES.PASSPORT}>Passport</option>
-                  <option value={documentService.DOCUMENT_TYPES.RCCM}>RCCM</option>
-                </select>
-                <textarea 
-                  placeholder="Description" 
-                  value={documentForm.description} 
-                  onChange={(e) => setDocumentForm({...documentForm, description: e.target.value})} 
-                  rows={3} 
-                  className="w-full px-4 py-2 border rounded-xl" 
-                />
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Nouveau fichier (optionnel)
-                  </label>
-                  <input 
-                    type="file" 
-                    onChange={(e) => setDocumentFile(e.target.files?.[0] || null)} 
-                    className="w-full px-4 py-2 border rounded-xl" 
-                  />
-                  {documentFile && (
-                    <p className="mt-1 text-xs text-gray-500">
-                      Nouveau fichier: {documentFile.name}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div className="flex gap-3 mt-6">
-                <button 
-                  onClick={() => setShowEditDocumentModal(false)} 
-                  className="flex-1 px-4 py-2 bg-gray-100 rounded-xl"
-                >
-                  Annuler
-                </button>
-                <button 
-                  onClick={handleUpdateDocument} 
-                  className="flex-1 px-4 py-2 bg-[#0f7b6c] text-white rounded-xl"
-                >
-                  Modifier
-                </button>
-              </div>
+              ) : (
+                <div className="p-6 text-center text-gray-500">Aucun fichier disponible</div>
+              )}
             </div>
           </div>
         </div>

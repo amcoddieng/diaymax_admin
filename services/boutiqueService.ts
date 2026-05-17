@@ -90,10 +90,10 @@ export const boutiqueService = {
 
   // Documents APIs
   getBoutiqueDocuments: (boutiqueId: number) =>
-    api.get(`/api/documents/boutique/${boutiqueId}`),
+    api.get(`/api/documents/personne/${boutiqueId}`),
   
   createBoutiqueDocument: (boutiqueId: number, formData: FormData) =>
-    api.post(`/api/documents/boutique/${boutiqueId}/with-file`, formData, {
+    api.post('/api/documents/with-file', formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     }),
   
