@@ -541,7 +541,7 @@ export default function UsersPage() {
                           {user.photoProfil ? (
                             <img
                               className="h-10 w-10 rounded-full object-cover"
-                              src={`https://c3c9-102-164-160-251.ngrok-free.app${user.photoProfil}`}
+                              src={`https://98c3-102-164-160-251.ngrok-free.app${user.photoProfil}`}
                               alt={`${user.prenom} ${user.nom}`}
                             />
                           ) : (
