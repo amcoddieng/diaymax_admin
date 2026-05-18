@@ -538,7 +538,7 @@ export default function ProductArticlesPage({ params }: { params: Promise<{ prod
             <div className="flex items-center space-x-4">
               {product.image && (
                 <img
-                  src={`https://98c3-102-164-160-251.ngrok-free.app${product.image}`}
+                  src={`http://10.153.46.247:8080${product.image}`}
                   alt={product.nom}
                   className="h-16 w-16 object-cover rounded-lg"
                 />
@@ -615,7 +615,7 @@ export default function ProductArticlesPage({ params }: { params: Promise<{ prod
                         <div className="flex items-center">
                           {article.image ? (
                             <img
-                              src={`https://98c3-102-164-160-251.ngrok-free.app/uploads/${article.image}`}
+                              src={`http://10.153.46.247:8080/uploads/${article.image}`}
                               alt={article.sku}
                               className="h-10 w-10 object-cover rounded-lg mr-3"
                             />
@@ -921,7 +921,7 @@ export default function ProductArticlesPage({ params }: { params: Promise<{ prod
                 <p className="mt-2 text-sm text-gray-600">Fichier sélectionné : {editImageFile.name}</p>
               ) : selectedArticle?.image ? (
                 <img
-                  src={`https://98c3-102-164-160-251.ngrok-free.app${selectedArticle.image}`}
+                  src={`http://10.153.46.247:8080${selectedArticle.image}`}
                   alt="Image actuelle"
                   className="mt-3 h-24 w-auto rounded-lg border border-gray-200"
                 />
@@ -1057,7 +1057,7 @@ export default function ProductArticlesPage({ params }: { params: Promise<{ prod
             {selectedArticle?.image && (
               <div className="flex justify-center mb-6">
                 <img
-                  src={`https://98c3-102-164-160-251.ngrok-free.app${selectedArticle.image}`}
+                  src={`http://10.153.46.247:8080${selectedArticle.image}`}
                   alt={selectedArticle.sku}
                   className="h-48 w-48 object-cover rounded-2xl shadow-lg border-4 border-gray-200"
                 />

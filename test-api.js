@@ -1,7 +1,7 @@
 // Test script for API connection
 const axios = require('axios');
 
-const API_URL = 'https://98c3-102-164-160-251.ngrok-free.app';
+const API_URL = 'http://10.153.46.247:8080';
 const TEST_CREDENTIALS = {
   email: 'admin@tissenza.com',
   password: 'admin123'

@@ -513,7 +513,7 @@ export default function OrdersPage() {
                       {selectedOrder.details?.map((detail, index) => (
                         <div key={index} className="flex justify-between items-center p-2 bg-gray-50 rounded">
                           <div>
-                            <p className="font-medium">{detail.article.nom}</p>
+                            <p className="font-medium">{detail.article?.nom || 'Article inconnu'}</p>
                             <p className="text-sm text-gray-500">Quantité: {detail.quantite} × {formatCurrency(detail.prixUnitaire)}</p>
                           </div>
                           <p className="font-bold">{formatCurrency(detail.sousTotal)}</p>

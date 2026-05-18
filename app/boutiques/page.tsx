@@ -315,7 +315,7 @@ export default function BoutiquesPage() {
                 {boutique.logo ? (
                   <>
                     <img
-                      src={`https://98c3-102-164-160-251.ngrok-free.app${boutique.logo}`}
+                      src={`http://10.153.46.247:8080${boutique.logo}`}
                       alt={boutique.nom}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
@@ -471,7 +471,7 @@ export default function BoutiquesPage() {
                 <div className="h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-md flex items-center justify-center overflow-hidden">
                   {selectedBoutique.logo ? (
                     <img
-                      src={`https://98c3-102-164-160-251.ngrok-free.app${selectedBoutique.logo}`}
+                      src={`http://10.153.46.247:8080${selectedBoutique.logo}`}
                       alt={selectedBoutique.nom}
                       className="w-full h-full object-cover"
                     />

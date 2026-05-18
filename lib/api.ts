@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://98c3-102-164-160-251.ngrok-free.app" || 'https://98c3-102-164-160-251.ngrok-free.app'
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://10.153.46.247:8080" || 'http://10.153.46.247:8080'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -272,6 +272,45 @@ export const documentAPI = {
     api.post(`/api/documents/${id}/file`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     }),
+}
+
+// Panier (Cart) Management APIs
+export const panierAPI = {
+  getAllPaniers: () =>
+    api.get('/api/paniers'),
+  
+  getPanierById: (panierId: number) =>
+    api.get(`/api/paniers/${panierId}`),
+  
+  getPaniersByClient: (clientId: number) =>
+    api.get(`/api/paniers/client/${clientId}`),
+  
+  getActivePanierByClient: (clientId: number) =>
+    api.get(`/api/paniers/client/${clientId}/actif`),
+  
+  createPanier: (clientId: number) =>
+    api.post('/api/paniers', { clientId }),
+  
+  updatePanier: (panierId: number, data: any) =>
+    api.put(`/api/paniers/${panierId}`, data),
+  
+  deletePanier: (panierId: number) =>
+    api.delete(`/api/paniers/${panierId}`),
+  
+  addItemToPanier: (clientId: number, articleId: number, quantite: number, prixUnitaire: number) =>
+    api.post(`/api/paniers/client/${clientId}/ajouter`, { articleId, quantite, prixUnitaire }),
+  
+  updateItemQuantity: (panierId: number, articleId: number, quantite: number) =>
+    api.put(`/api/paniers/${panierId}/article/${articleId}/quantite?quantite=${quantite}`),
+  
+  deleteItemFromPanier: (panierId: number, articleId: number) =>
+    api.delete(`/api/paniers/${panierId}/article/${articleId}`),
+  
+  clearPanier: (panierId: number) =>
+    api.delete(`/api/paniers/${panierId}/vider`),
+  
+  validatePanier: (panierId: number) =>
+    api.post(`/api/paniers/${panierId}/valider`),
 }
 
 export default api
